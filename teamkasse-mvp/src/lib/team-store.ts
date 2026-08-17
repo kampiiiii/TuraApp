@@ -132,5 +132,5 @@ function normalizeState(state: TeamState): TeamState {
 }
 
 function useLocalFileStore() {
-  return process.env.NETLIFY !== "true";
+  return !process.env.NETLIFY_BLOBS_CONTEXT;
 }
