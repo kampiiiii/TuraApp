@@ -14,7 +14,7 @@ export function BookingForm({
   team: Team | null;
   disabled?: boolean;
 }) {
-  const players = members.filter((member) => member.active);
+  const players = members.filter((member) => member.active && member.role === "player");
 
   return (
     <section className="admin-panel">

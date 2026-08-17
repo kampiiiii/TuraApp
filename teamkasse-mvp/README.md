@@ -5,10 +5,11 @@ Kostenlose MVP-Web-App/PWA fuer eine Fussballmannschaft: Strafen, Getraenke, Zah
 ## Stack
 
 - Next.js App Router als PWA
-- Supabase Auth, Postgres und Row Level Security
-- Cloudflare Workers Deployment mit `@opennextjs/cloudflare`
+- Netlify Hosting plus Netlify Functions
+- Netlify Blobs als einfacher Speicher fuer das MVP
+- Eigener Login: Admin-Passwort fuer den Kassenwart, Spieler-PINs fuer Spieler
 
-Die App laeuft ohne Supabase-Konfiguration im Demo-Modus mit Beispieldaten. Sobald die Supabase-Variablen gesetzt sind, nutzt sie echte Auth- und Datenbankdaten.
+Die App braucht kein Supabase-Projekt. Ohne Login-Variablen zeigt sie eine Setup-Meldung. Sobald die Netlify-Variablen gesetzt sind, koennen Admin und Spieler getrennt rein.
 
 ## Lokal starten
 
@@ -19,27 +20,29 @@ npm run dev
 
 Dann im Browser `http://localhost:3000` oeffnen.
 
-## Supabase einrichten
+## Login einrichten
 
-1. Neues Supabase-Projekt anlegen.
-2. `supabase/migrations/0001_initial_schema.sql` im SQL Editor ausfuehren.
-3. Optional `supabase/seed.sql` ausfuehren und die Beispiel-UUIDs anpassen.
-4. `.env.example` nach `.env.local` kopieren und die Supabase URL sowie den anon key eintragen.
-5. Fuer den ersten echten Admin entweder die Onboarding-Policy nutzen oder im Supabase Dashboard einen Auth-User mit einem `team_members.user_id` verknuepfen.
-
-## Cloudflare Workers Deployment
+Lege lokal eine `.env.local` an oder setze die Werte in Netlify:
 
 ```bash
-npm run deploy
+TEAMKASSE_ADMIN_PASSWORD=ein-sicheres-admin-passwort
+TEAMKASSE_SESSION_SECRET=ein-langes-zufaelliges-geheimnis
 ```
 
-Fuer lokale Workers-Vorschau:
+Der Kassenwart meldet sich mit dem Admin-Passwort an. Spieler melden sich mit Name und PIN an. PINs kann der Kassenwart in der Admin-Seite vergeben.
+
+## Netlify Deployment
 
 ```bash
-npm run preview
+npm run build
 ```
 
-Die Runtime-Variablen `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_ANON_KEY` muessen in Cloudflare auch als Build-/Runtime-Variablen gesetzt werden.
+Netlify-Einstellungen:
+
+- Build command: `npm run build`
+- Publish directory: `.next`
+- Runtime: Next.js
+- Environment variables: `TEAMKASSE_ADMIN_PASSWORD` und `TEAMKASSE_SESSION_SECRET`
 
 ## Enthaltene MVP-Funktionen
 
@@ -47,7 +50,7 @@ Die Runtime-Variablen `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_ANON_
 - Admin: Spieler verwalten, Katalog pflegen, Strafen/Getraenke/Zahlungen buchen, Eintraege stornieren
 - Spieler: eigene Buchungen, Zahlungen, Summen und Gesamtsaldo sehen
 - Ledger-Modell: keine harten Loeschungen, Korrekturen laufen ueber Storno oder Gegenbuchung
-- RLS-Policies: Admins sehen ihr Team, Spieler nur eigene Daten
+- Server-Aktionen pruefen Adminrechte, Spieler bekommen nur eigene Daten
 - PWA-Grundlage: Manifest, Icon, Offline-Fallback, Service Worker
 
 ## Projekt-Dokumente

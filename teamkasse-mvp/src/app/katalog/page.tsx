@@ -2,14 +2,14 @@ import { ClipboardList } from "lucide-react";
 import { LoginRequired, NoTeamState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { formatMoney } from "@/lib/money";
-import { getAppData } from "@/lib/supabase/queries";
+import { getAppData } from "@/lib/team-queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function CatalogPage() {
   const data = await getAppData();
 
-  if (data.authState === "anonymous") {
+  if (data.authState === "anonymous" || data.authState === "setup-required") {
     return <LoginRequired />;
   }
 

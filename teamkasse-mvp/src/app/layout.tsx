@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { AppShell } from "@/components/app-shell";
 import { ServiceWorker } from "@/components/service-worker";
-import { getShellData } from "@/lib/supabase/queries";
+import { getShellData } from "@/lib/team-queries";
 import "./globals.css";
 
 export const metadata: Metadata = {

@@ -4,14 +4,14 @@ import { ForbiddenState, LoginRequired, NoTeamState } from "@/components/empty-s
 import { LedgerTable } from "@/components/ledger-table";
 import { MemberManager } from "@/components/member-manager";
 import { PageHeader } from "@/components/page-header";
-import { getAppData } from "@/lib/supabase/queries";
+import { getAppData } from "@/lib/team-queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const data = await getAppData();
 
-  if (data.authState === "anonymous") {
+  if (data.authState === "anonymous" || data.authState === "setup-required") {
     return <LoginRequired />;
   }
 
@@ -28,7 +28,7 @@ export default async function AdminPage() {
       <PageHeader
         eyebrow="Admin"
         title="Kassenwart-Zentrale"
-        description="Spieler, Katalog und Buchungen an einem Ort. Im Demo-Modus sind Speichern-Buttons deaktiviert."
+        description="Spieler, Katalog und Buchungen an einem Ort. Nur angemeldete Admins koennen hier speichern."
       />
 
       <BookingForm members={data.members} catalog={data.catalog} team={data.team} disabled={data.isDemo} />

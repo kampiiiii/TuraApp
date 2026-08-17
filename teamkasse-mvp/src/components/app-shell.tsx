@@ -8,7 +8,7 @@ type ShellContext = Pick<AppData, "isDemo" | "authState" | "team" | "currentMemb
 
 export function AppShell({ children, context }: { children: ReactNode; context: ShellContext }) {
   const isAdmin = context.currentMember?.role === "admin";
-  const showAppLinks = context.authState === "demo" || context.authState === "member";
+  const showAppLinks = context.authState === "member";
 
   return (
     <div className="app-shell">
@@ -17,7 +17,7 @@ export function AppShell({ children, context }: { children: ReactNode; context: 
           <span className="brand-mark">TK</span>
           <span>
             <strong>{context.team?.name ?? "Teamkasse"}</strong>
-            <small>{context.isDemo ? "Demo-Modus" : context.currentMember?.display_name ?? "PWA"}</small>
+            <small>{context.isDemo ? "Setup fehlt" : context.currentMember?.display_name ?? "PWA"}</small>
           </span>
         </Link>
 
@@ -35,7 +35,7 @@ export function AppShell({ children, context }: { children: ReactNode; context: 
         </nav>
 
         <div className="sidebar-footer">
-          {context.isDemo ? <span className="demo-chip">Supabase nicht verbunden</span> : null}
+          {context.isDemo ? <span className="demo-chip">Login-Setup fehlt</span> : null}
           {!context.isDemo && context.authState === "member" ? (
             <form action={logoutAction}>
               <button className="ghost-button full-width" type="submit">

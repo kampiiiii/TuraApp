@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { createMemberAction } from "@/app/actions";
+import { createMemberAction, setMemberPinAction } from "@/app/actions";
 import type { TeamMember } from "@/lib/types";
 
 export function MemberManager({ members, disabled = false }: { members: TeamMember[]; disabled?: boolean }) {
@@ -20,6 +20,10 @@ export function MemberManager({ members, disabled = false }: { members: TeamMemb
           <input name="jersey_number" type="number" min="1" placeholder="9" disabled={disabled} />
         </label>
         <label>
+          Start-PIN
+          <input name="access_pin" type="password" inputMode="numeric" placeholder="z. B. 1234" disabled={disabled} />
+        </label>
+        <label>
           Rolle
           <select name="role" defaultValue="player" disabled={disabled}>
             <option value="player">Spieler</option>
@@ -34,11 +38,27 @@ export function MemberManager({ members, disabled = false }: { members: TeamMemb
 
       <div className="member-list">
         {members.map((member) => (
-          <span key={member.id} className="member-chip">
-            {member.jersey_number ? <strong>#{member.jersey_number}</strong> : null}
-            {member.display_name}
-            <small>{member.role === "admin" ? "Admin" : "Spieler"}</small>
-          </span>
+          <article key={member.id} className="member-chip">
+            <span>
+              {member.jersey_number ? <strong>#{member.jersey_number}</strong> : null}
+              {member.display_name}
+              <small>{member.role === "admin" ? "Admin" : "Spieler"}</small>
+            </span>
+            <form action={setMemberPinAction} className="pin-form">
+              <input type="hidden" name="member_id" value={member.id} />
+              <input
+                name="access_pin"
+                type="password"
+                inputMode="numeric"
+                placeholder="Neue PIN"
+                disabled={disabled}
+                minLength={4}
+              />
+              <button className="ghost-button" type="submit" disabled={disabled}>
+                PIN
+              </button>
+            </form>
+          </article>
         ))}
       </div>
     </section>

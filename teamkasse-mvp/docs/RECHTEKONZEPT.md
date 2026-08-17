@@ -10,13 +10,20 @@
 
 ## Spieler
 
+- meldet sich mit eigenem Namen und eigener PIN an
 - sieht nur eigene Mitgliedschaftsdaten
 - sieht nur eigene Buchungen, Zahlungen und Salden
 - kann keine Buchungen veraendern
 - kann keine anderen Spieler sehen
 
-## Row Level Security
+## Serverseitige Grenze im MVP
 
-Die SQL-Migration aktiviert RLS auf allen fachlichen Tabellen. Hilfsfunktionen wie `is_team_admin(team_id)` und `is_team_member(team_id)` pruefen die Rechte serverseitig anhand von `auth.uid()`.
+Die verbindliche Pruefung liegt in Server-Aktionen und Server-Abfragen:
 
-Wichtig: Client-Code darf nie als alleinige Sicherheitsgrenze gelten. Die UI versteckt Admin-Aktionen fuer Spieler, aber die verbindliche Grenze liegt in den Supabase-Policies.
+- `TEAMKASSE_ADMIN_PASSWORD` oeffnet den Kassenwart-Zugang.
+- Spieler-PINs werden nicht im Klartext gespeichert, sondern als HMAC-Hash.
+- Die Session liegt als signiertes, `httpOnly` Cookie im Browser.
+- Admin-Aktionen rufen `requireAdmin()` auf.
+- Spieler-Abfragen filtern Ledger, Salden und Mitgliedsdaten auf den angemeldeten Spieler.
+
+Wichtig: Wenn spaeter mehrere Mannschaften, Einladungslinks oder echte Bankfunktionen dazukommen, ist Supabase/Postgres mit Row Level Security weiterhin ein guter naechster Sicherheitsausbau.

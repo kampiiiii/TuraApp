@@ -1,90 +1,60 @@
-"use client";
+import { LogIn, ShieldCheck } from "lucide-react";
+import { loginAdminAction, loginPlayerAction } from "@/app/actions";
+import type { TeamMember } from "@/lib/types";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { LogIn, UserPlus } from "lucide-react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-
-export function LoginForm({ configured }: { configured: boolean }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
-  const router = useRouter();
-
-  async function signIn() {
-    setPending(true);
-    setMessage(null);
-
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        setMessage(error.message);
-      } else {
-        router.push("/dashboard");
-        router.refresh();
-      }
-    } finally {
-      setPending(false);
-    }
-  }
-
-  async function signUp() {
-    setPending(true);
-    setMessage(null);
-
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const { error } = await supabase.auth.signUp({ email, password });
-
-      if (error) {
-        setMessage(error.message);
-      } else {
-        setMessage("Account angelegt. Je nach Supabase-Einstellung bitte E-Mail bestaetigen.");
-      }
-    } finally {
-      setPending(false);
-    }
-  }
-
+export function LoginForm({ configured, members }: { configured: boolean; members: TeamMember[] }) {
   if (!configured) {
     return (
       <section className="login-card">
-        <h2>Supabase noch nicht verbunden</h2>
-        <p>Trage `NEXT_PUBLIC_SUPABASE_URL` und `NEXT_PUBLIC_SUPABASE_ANON_KEY` ein. Bis dahin zeigt die App Demo-Daten.</p>
+        <h2>Login noch nicht eingerichtet</h2>
+        <p>
+          Setze in Netlify die Variablen `TEAMKASSE_ADMIN_PASSWORD` und `TEAMKASSE_SESSION_SECRET`. Danach kann der
+          Kassenwart Spieler-PINs vergeben.
+        </p>
       </section>
     );
   }
 
   return (
-    <section className="login-card">
-      <h2>Anmelden</h2>
-      <label>
-        E-Mail
-        <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" />
-      </label>
-      <label>
-        Passwort
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          autoComplete="current-password"
-        />
-      </label>
-      {message ? <p className="form-message">{message}</p> : null}
-      <div className="button-row">
-        <button className="primary-button" type="button" onClick={signIn} disabled={pending || !email || !password}>
-          <LogIn size={16} />
-          Anmelden
-        </button>
-        <button className="ghost-button" type="button" onClick={signUp} disabled={pending || !email || !password}>
-          <UserPlus size={16} />
-          Registrieren
-        </button>
-      </div>
-    </section>
+    <div className="login-grid">
+      <section className="login-card">
+        <h2>Kassenwart</h2>
+        <form action={loginAdminAction} className="login-form">
+          <label>
+            Admin-Passwort
+            <input name="admin_password" type="password" autoComplete="current-password" required />
+          </label>
+          <button className="primary-button" type="submit">
+            <ShieldCheck size={16} />
+            Als Admin anmelden
+          </button>
+        </form>
+      </section>
+
+      <section className="login-card">
+        <h2>Spieler</h2>
+        <form action={loginPlayerAction} className="login-form">
+          <label>
+            Spieler
+            <select name="member_id" required>
+              <option value="">Auswaehlen</option>
+              {members.map((member) => (
+                <option value={member.id} key={member.id}>
+                  {member.display_name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            PIN
+            <input name="pin" type="password" inputMode="numeric" autoComplete="current-password" required />
+          </label>
+          <button className="ghost-button" type="submit">
+            <LogIn size={16} />
+            Als Spieler anmelden
+          </button>
+        </form>
+      </section>
+    </div>
   );
 }

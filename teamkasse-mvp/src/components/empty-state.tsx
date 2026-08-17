@@ -6,7 +6,7 @@ export function LoginRequired() {
     <section className="empty-state">
       <ShieldAlert size={28} />
       <h2>Anmeldung erforderlich</h2>
-      <p>Verbinde Supabase und melde dich an, damit echte Mannschaftsdaten geladen werden.</p>
+      <p>Melde dich als Kassenwart oder Spieler an, damit echte Mannschaftsdaten geladen werden.</p>
       <Link className="primary-button" href="/login">
         <LogIn size={16} />
         Zum Login
@@ -20,7 +20,7 @@ export function NoTeamState() {
     <section className="empty-state">
       <ShieldAlert size={28} />
       <h2>Noch keiner Mannschaft zugeordnet</h2>
-      <p>Der Auth-User ist vorhanden, aber es gibt noch keinen passenden Eintrag in `team_members`.</p>
+      <p>Der Zugang ist vorhanden, aber diesem Mitglied ist noch keine aktive Mannschaft zugeordnet.</p>
     </section>
   );
 }

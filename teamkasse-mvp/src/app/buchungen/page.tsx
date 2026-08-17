@@ -1,14 +1,14 @@
 import { LoginRequired, NoTeamState } from "@/components/empty-state";
 import { LedgerTable } from "@/components/ledger-table";
 import { PageHeader } from "@/components/page-header";
-import { getAppData } from "@/lib/supabase/queries";
+import { getAppData } from "@/lib/team-queries";
 
 export const dynamic = "force-dynamic";
 
 export default async function BookingsPage() {
   const data = await getAppData();
 
-  if (data.authState === "anonymous") {
+  if (data.authState === "anonymous" || data.authState === "setup-required") {
     return <LoginRequired />;
   }
 

@@ -2,7 +2,7 @@ export type AppRole = "admin" | "player";
 export type CatalogType = "fine" | "drink";
 export type LedgerType = "fine" | "drink" | "payment" | "adjustment";
 export type LedgerStatus = "open" | "paid" | "voided";
-export type AuthState = "demo" | "anonymous" | "member" | "no-team";
+export type AuthState = "setup-required" | "anonymous" | "member" | "no-team";
 
 export type Team = {
   id: string;
@@ -21,6 +21,10 @@ export type TeamMember = {
   jersey_number: number | null;
   role: AppRole;
   active: boolean;
+};
+
+export type StoredTeamMember = TeamMember & {
+  pin_hash: string | null;
 };
 
 export type CatalogItem = {
@@ -74,4 +78,12 @@ export type AppData = {
   catalog: CatalogItem[];
   ledger: LedgerEntry[];
   balances: MemberBalance[];
+};
+
+export type TeamState = {
+  version: number;
+  team: Team;
+  members: StoredTeamMember[];
+  catalog: CatalogItem[];
+  ledger: LedgerEntry[];
 };

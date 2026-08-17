@@ -1,18 +1,20 @@
 import { LoginForm } from "@/components/login-form";
 import { PageHeader } from "@/components/page-header";
-import { hasSupabaseEnv } from "@/lib/supabase/server";
+import { getLoginData } from "@/lib/team-queries";
 
 export const dynamic = "force-dynamic";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const data = await getLoginData();
+
   return (
     <div className="page-stack narrow">
       <PageHeader
         eyebrow="Login"
         title="Mannschaft anmelden"
-        description="Supabase Auth uebernimmt die Anmeldung. Rollen und Rechte kommen aus `team_members` und RLS."
+        description="Admin und Spieler haben getrennte Zugänge. Der Kassenwart vergibt die Spieler-PINs."
       />
-      <LoginForm configured={hasSupabaseEnv()} />
+      <LoginForm configured={data.configured} members={data.members} />
     </div>
   );
 }

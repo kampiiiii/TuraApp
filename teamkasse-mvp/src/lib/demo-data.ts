@@ -162,7 +162,7 @@ const balances: MemberBalance[] = members
 
 export const demoData: AppData = {
   isDemo: true,
-  authState: "demo",
+  authState: "setup-required",
   team,
   currentMember: members[0],
   members,
