@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Teamkasse">
+  <rect width="512" height="512" rx="96" fill="#0f766e"/>
+  <path d="M144 184c0-31 25-56 56-56h112c31 0 56 25 56 56v160c0 22-18 40-40 40H184c-22 0-40-18-40-40V184Z" fill="#f7f7f5"/>
+  <path d="M184 208h144M184 256h144M184 304h88" stroke="#0f766e" stroke-width="30" stroke-linecap="round"/>
+  <circle cx="352" cy="352" r="58" fill="#f97316"/>
+  <path d="M328 352h48M352 328v48" stroke="#fff7ed" stroke-width="24" stroke-linecap="round"/>
+</svg>
