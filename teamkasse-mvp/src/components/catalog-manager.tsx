@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ArrowDown, ArrowUp, Beer, ClipboardList, Euro, ListOrdered, Plus } from "lucide-react";
 import { createCatalogItemAction, moveCatalogItemAction, sortCatalogItemsAction } from "@/app/actions";
+import { DeleteCatalogItemButton } from "@/components/delete-catalog-item-button";
 import { formatMoney } from "@/lib/money";
 import type { CatalogItem, CatalogType, Team } from "@/lib/types";
 
@@ -139,6 +140,7 @@ function CatalogList({
                 icon={<ArrowDown size={15} />}
                 disabled={disabled || index === items.length - 1}
               />
+              <DeleteCatalogItemButton itemId={item.id} itemName={item.name} disabled={disabled} />
             </span>
           </div>
         </div>

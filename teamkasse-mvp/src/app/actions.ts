@@ -333,6 +333,26 @@ export async function createCatalogItemAction(formData: FormData) {
   revalidateAll();
 }
 
+export async function deleteCatalogItemAction(formData: FormData) {
+  const { state } = await requireAdmin();
+  const itemId = String(formData.get("item_id") ?? "");
+  const confirmation = String(formData.get("confirm_delete") ?? "");
+
+  if (confirmation !== "delete-catalog-item") {
+    throw new Error("Das Loeschen wurde nicht bestaetigt.");
+  }
+
+  const itemIndex = state.catalog.findIndex((item) => item.id === itemId);
+
+  if (itemIndex < 0) {
+    throw new Error("Katalogeintrag wurde nicht gefunden.");
+  }
+
+  state.catalog.splice(itemIndex, 1);
+  await saveTeamState(state);
+  revalidateAll();
+}
+
 export async function moveCatalogItemAction(formData: FormData) {
   const { state } = await requireAdmin();
   const itemId = String(formData.get("item_id") ?? "");

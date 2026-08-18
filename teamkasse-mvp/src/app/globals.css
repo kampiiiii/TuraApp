@@ -927,6 +927,16 @@ select:focus {
   min-height: 32px;
 }
 
+.icon-button.catalog-delete-button {
+  color: var(--danger);
+}
+
+.icon-button.catalog-delete-button:hover {
+  border-color: color-mix(in srgb, var(--danger) 38%, var(--line));
+  color: #ffffff;
+  background: var(--danger);
+}
+
 .catalog-group .catalog-row {
   border: 0;
   border-top: 1px solid var(--line);

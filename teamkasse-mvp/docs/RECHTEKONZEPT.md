@@ -3,7 +3,7 @@
 ## Admin / Kassenwart
 
 - sieht alle Mitglieder der eigenen Mannschaft
-- pflegt Strafenkatalog und Getraenkekatalog
+- pflegt Strafenkatalog und Getraenkekatalog und kann Positionen daraus loeschen
 - sortiert Katalogpositionen und verschiebt sie nach oben oder unten
 - bucht Strafen, Getraenke, Zahlungen und Anpassungen
 - hakt mitgebrachte Sachleistungen ab oder oeffnet sie wieder
