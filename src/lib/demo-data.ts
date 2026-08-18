@@ -198,5 +198,16 @@ export const demoData: AppData = {
   members,
   catalog,
   ledger,
-  balances
+  balances,
+  treasury: {
+    summary: {
+      balance_set_cents: 0,
+      player_payments_cents: 1000,
+      other_income_cents: 0,
+      expenses_cents: 0,
+      current_balance_cents: 1000,
+      balance_set_at: null
+    },
+    entries: []
+  }
 };

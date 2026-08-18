@@ -386,6 +386,7 @@ select:disabled {
 .pay-preview,
 .quick-action,
 .admin-panel,
+.treasury-panel,
 .table-section,
 .catalog-column,
 .login-card,
@@ -612,12 +613,14 @@ tbody tr:hover {
   gap: 18px;
 }
 
-.admin-panel {
+.admin-panel,
+.treasury-panel {
   padding: 18px;
 }
 
 .form-grid,
-.booking-grid {
+.booking-grid,
+.treasury-form {
   display: grid;
   gap: 12px;
 }
@@ -628,6 +631,18 @@ tbody tr:hover {
 
 .booking-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.treasury-form {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cash-amount.income {
+  color: var(--ok);
+}
+
+.cash-amount.expense {
+  color: var(--danger);
 }
 
 label {
@@ -1236,6 +1251,10 @@ select:focus {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .treasury-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .form-grid,
   .catalog-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1383,6 +1402,7 @@ select:focus {
 
   .form-grid,
   .booking-grid,
+  .treasury-form,
   .catalog-columns,
   .catalog-groups,
   .login-grid,
@@ -1412,6 +1432,7 @@ select:focus {
   .pay-preview,
   .quick-action,
   .admin-panel,
+  .treasury-panel,
   .catalog-column,
   .login-card,
   .profile-panel,

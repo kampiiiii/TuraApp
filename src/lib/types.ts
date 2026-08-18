@@ -4,6 +4,8 @@ export type LedgerType = "fine" | "drink" | "payment" | "adjustment";
 export type LedgerStatus = "open" | "partial" | "paid" | "voided";
 export type BookingSource = "admin" | "player";
 export type AuthState = "setup-required" | "anonymous" | "member" | "no-team";
+export type TreasuryEntryType = "balance" | "income" | "expense";
+export type TreasuryEntryStatus = "active" | "voided";
 
 export type Team = {
   id: string;
@@ -81,6 +83,49 @@ export type MemberBalance = {
   balance_cents: number;
 };
 
+export type TreasuryEntry = {
+  id: string;
+  team_id: string;
+  type: TreasuryEntryType;
+  description: string;
+  amount_cents: number;
+  booking_date: string;
+  notes: string | null;
+  status: TreasuryEntryStatus;
+  created_by_member_id: string | null;
+  created_by_name: string | null;
+  void_reason: string | null;
+  created_at: string;
+};
+
+export type TreasuryBookEntry = {
+  id: string;
+  type: TreasuryEntryType | "player_payment";
+  description: string;
+  member_name: string | null;
+  amount_cents: number;
+  booking_date: string;
+  notes: string | null;
+  status: TreasuryEntryStatus;
+  source: "manual" | "ledger";
+  included_in_balance: boolean;
+  created_at: string;
+};
+
+export type TreasurySummary = {
+  balance_set_cents: number;
+  player_payments_cents: number;
+  other_income_cents: number;
+  expenses_cents: number;
+  current_balance_cents: number;
+  balance_set_at: string | null;
+};
+
+export type TreasuryData = {
+  summary: TreasurySummary;
+  entries: TreasuryBookEntry[];
+};
+
 export type AppData = {
   isDemo: boolean;
   authState: AuthState;
@@ -90,6 +135,7 @@ export type AppData = {
   catalog: CatalogItem[];
   ledger: LedgerEntry[];
   balances: MemberBalance[];
+  treasury: TreasuryData;
 };
 
 export type TeamState = {
@@ -98,4 +144,5 @@ export type TeamState = {
   members: StoredTeamMember[];
   catalog: CatalogItem[];
   ledger: LedgerEntry[];
+  treasury_entries: TreasuryEntry[];
 };
