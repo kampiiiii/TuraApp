@@ -94,6 +94,9 @@ const ledger: LedgerEntry[] = [
     status: "open",
     booking_date: "2026-08-12",
     notes: "Training Mittwoch",
+    source: "admin",
+    created_by_member_id: "demo-admin",
+    created_by_name: "Max Kassenwart",
     correction_of: null,
     void_reason: null,
     created_at: "2026-08-12T18:10:00Z"
@@ -113,6 +116,9 @@ const ledger: LedgerEntry[] = [
     status: "open",
     booking_date: "2026-08-14",
     notes: null,
+    source: "admin",
+    created_by_member_id: "demo-admin",
+    created_by_name: "Max Kassenwart",
     correction_of: null,
     void_reason: null,
     created_at: "2026-08-14T21:00:00Z"
@@ -132,6 +138,9 @@ const ledger: LedgerEntry[] = [
     status: "paid",
     booking_date: "2026-08-15",
     notes: "Bar",
+    source: "admin",
+    created_by_member_id: "demo-admin",
+    created_by_name: "Max Kassenwart",
     correction_of: null,
     void_reason: null,
     created_at: "2026-08-15T19:00:00Z"

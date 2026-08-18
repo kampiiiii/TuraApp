@@ -145,6 +145,9 @@ function normalizeState(state: TeamState): TeamState {
       member_name: entry.member_name ?? "Unbekannt",
       catalog_item_name: entry.catalog_item_name ?? null,
       notes: entry.notes ?? null,
+      source: entry.source === "player" ? "player" : "admin",
+      created_by_member_id: entry.created_by_member_id ?? null,
+      created_by_name: entry.created_by_name ?? null,
       correction_of: entry.correction_of ?? null,
       void_reason: entry.void_reason ?? null
     }))

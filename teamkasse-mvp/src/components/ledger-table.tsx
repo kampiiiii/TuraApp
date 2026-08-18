@@ -3,6 +3,7 @@ import { voidLedgerEntryAction } from "@/app/actions";
 import { formatMoney } from "@/lib/money";
 import type { LedgerEntry, Team } from "@/lib/types";
 import { StatusPill } from "@/components/status-pill";
+import { DeleteLedgerEntryButton } from "@/components/delete-ledger-entry-button";
 
 export function LedgerTable({
   entries,
@@ -54,6 +55,7 @@ export function LedgerTable({
                   <span className="stacked-cell">
                     <strong>{entry.description}</strong>
                     {entry.notes ? <small>{entry.notes}</small> : null}
+                    {entry.source === "player" ? <small className="booking-source">Vom Spieler selbst gebucht</small> : null}
                     {entry.void_reason ? <small>Storno: {entry.void_reason}</small> : null}
                   </span>
                 </td>
@@ -64,17 +66,18 @@ export function LedgerTable({
                 </td>
                 {canVoid ? (
                   <td>
-                    {entry.status !== "voided" ? (
-                      <form action={voidLedgerEntryAction} className="inline-action">
-                        <input type="hidden" name="entry_id" value={entry.id} />
-                        <input type="hidden" name="void_reason" value="Fehleintrag storniert" />
-                        <button className="icon-button danger" type="submit" title="Buchung stornieren" disabled={disabled}>
-                          <Ban size={16} />
-                        </button>
-                      </form>
-                    ) : (
-                      <span className="muted">-</span>
-                    )}
+                    <span className="ledger-actions">
+                      {entry.status !== "voided" ? (
+                        <form action={voidLedgerEntryAction} className="inline-action">
+                          <input type="hidden" name="entry_id" value={entry.id} />
+                          <input type="hidden" name="void_reason" value="Fehleintrag storniert" />
+                          <button className="icon-button danger" type="submit" title="Buchung stornieren" disabled={disabled}>
+                            <Ban size={16} />
+                          </button>
+                        </form>
+                      ) : null}
+                      <DeleteLedgerEntryButton entryId={entry.id} disabled={disabled} />
+                    </span>
                   </td>
                 ) : null}
               </tr>

@@ -386,6 +386,7 @@ select:disabled {
 .catalog-column,
 .login-card,
 .profile-panel,
+.self-drink-panel,
 .empty-state {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -440,6 +441,7 @@ select:disabled {
 .catalog-group h3,
 .login-card h2,
 .profile-panel h2,
+.self-drink-panel h2,
 .empty-state h2,
 .empty-state h1 {
   margin: 0;
@@ -451,6 +453,26 @@ select:disabled {
   display: flex;
   align-items: center;
   gap: 11px;
+}
+
+.self-drink-heading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.self-drink-heading > span:last-child {
+  display: grid;
+  gap: 3px;
+}
+
+.self-drink-heading h2 {
+  margin: 0;
+  color: var(--ink);
+}
+
+.self-drink-heading small {
+  color: var(--muted);
 }
 
 .section-heading > span:last-child,
@@ -674,6 +696,16 @@ select:focus {
   color: var(--danger);
 }
 
+.icon-button.permanent-delete {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--line));
+  color: #ffffff;
+  background: var(--danger);
+}
+
+.icon-button.permanent-delete:hover {
+  background: color-mix(in srgb, var(--danger) 82%, #000000);
+}
+
 .icon-button:hover {
   background: var(--hover);
 }
@@ -850,6 +882,30 @@ select:focus {
   border-top: 3px solid var(--brand);
 }
 
+.self-drink-panel {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border-left: 3px solid var(--brand);
+}
+
+.self-drink-form {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) 110px auto;
+  gap: 12px;
+}
+
+.booking-source {
+  color: var(--brand-dark) !important;
+  font-weight: 800;
+}
+
+.ledger-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
 .profile-panel-heading h2 {
   margin: 0;
 }
@@ -956,6 +1012,10 @@ select:focus {
   .catalog-create-area {
     grid-template-columns: 1fr;
   }
+
+  .self-drink-form {
+    grid-template-columns: minmax(180px, 1fr) 110px auto;
+  }
 }
 
 @media (max-width: 720px) {
@@ -999,6 +1059,10 @@ select:focus {
 
   .catalog-manager > .section-title-row {
     align-items: flex-start;
+  }
+
+  .self-drink-form {
+    grid-template-columns: 1fr;
   }
 
   .span-2 {

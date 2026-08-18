@@ -2,6 +2,7 @@ export type AppRole = "admin" | "player";
 export type CatalogType = "fine" | "drink";
 export type LedgerType = "fine" | "drink" | "payment" | "adjustment";
 export type LedgerStatus = "open" | "paid" | "voided";
+export type BookingSource = "admin" | "player";
 export type AuthState = "setup-required" | "anonymous" | "member" | "no-team";
 
 export type Team = {
@@ -52,6 +53,9 @@ export type LedgerEntry = {
   status: LedgerStatus;
   booking_date: string;
   notes: string | null;
+  source: BookingSource;
+  created_by_member_id: string | null;
+  created_by_name: string | null;
   correction_of: string | null;
   void_reason: string | null;
   created_at: string;

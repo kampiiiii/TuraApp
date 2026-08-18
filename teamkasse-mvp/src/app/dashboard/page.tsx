@@ -5,6 +5,7 @@ import { LoginRequired, NoTeamState } from "@/components/empty-state";
 import { LedgerTable } from "@/components/ledger-table";
 import { MemberBalanceTable } from "@/components/member-balance-table";
 import { PageHeader } from "@/components/page-header";
+import { SelfDrinkForm } from "@/components/self-drink-form";
 import { formatMoney } from "@/lib/money";
 import { getAppData } from "@/lib/team-queries";
 
@@ -52,6 +53,8 @@ export default async function DashboardPage() {
           <strong>{formatMoney(currentBalance.balance_cents, data.team?.currency)}</strong>
         </section>
       ) : null}
+
+      {!isAdmin ? <SelfDrinkForm catalog={data.catalog} team={data.team} /> : null}
 
       {isAdmin ? <MemberBalanceTable balances={data.balances} team={data.team} /> : null}
 

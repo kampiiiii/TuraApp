@@ -20,6 +20,11 @@ export type PinChangeState = {
   message: string;
 };
 
+export type SelfDrinkState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
 export async function loginAdminAction(formData: FormData) {
   const password = String(formData.get("admin_password") ?? "");
 
@@ -165,6 +170,60 @@ export async function createCatalogItemAction(formData: FormData) {
   revalidateAll();
 }
 
+export async function createSelfDrinkAction(
+  _previousState: SelfDrinkState,
+  formData: FormData
+): Promise<SelfDrinkState> {
+  const { state, member } = await requireMember();
+  const catalogItemId = String(formData.get("catalog_item_id") ?? "");
+  const quantityRaw = Number(String(formData.get("quantity") ?? "1").replace(",", "."));
+
+  if (member.role !== "player") {
+    return { status: "error", message: "Diese Buchung ist nur fuer Spieler vorgesehen." };
+  }
+
+  if (!Number.isInteger(quantityRaw) || quantityRaw < 1 || quantityRaw > 50) {
+    return { status: "error", message: "Bitte eine Menge zwischen 1 und 50 eingeben." };
+  }
+
+  const drink = state.catalog.find(
+    (item) => item.id === catalogItemId && item.team_id === state.team.id && item.type === "drink" && item.active
+  );
+
+  if (!drink) {
+    return { status: "error", message: "Das Getraenk wurde im Katalog nicht gefunden." };
+  }
+
+  state.ledger.unshift({
+    id: randomUUID(),
+    team_id: state.team.id,
+    member_id: member.id,
+    member_name: member.display_name,
+    catalog_item_id: drink.id,
+    catalog_item_name: drink.name,
+    type: "drink",
+    description: drink.name,
+    quantity: quantityRaw,
+    unit_amount_cents: drink.amount_cents,
+    total_amount_cents: drink.amount_cents * quantityRaw,
+    status: "open",
+    booking_date: new Date().toISOString().slice(0, 10),
+    notes: null,
+    source: "player",
+    created_by_member_id: member.id,
+    created_by_name: member.display_name,
+    correction_of: null,
+    void_reason: null,
+    created_at: new Date().toISOString()
+  });
+
+  await saveTeamState(state);
+  revalidatePath("/dashboard");
+  revalidatePath("/buchungen");
+
+  return { status: "success", message: `${quantityRaw} x ${drink.name} wurde sofort gebucht.` };
+}
+
 export async function createLedgerEntryAction(formData: FormData) {
   const { state, member: admin } = await requireAdmin();
   const type = normalizeLedgerType(formData.get("type"));
@@ -227,6 +286,9 @@ export async function createLedgerEntryAction(formData: FormData) {
     status,
     booking_date: bookingDate,
     notes,
+    source: "admin",
+    created_by_member_id: admin.id,
+    created_by_name: admin.display_name,
     correction_of: null,
     void_reason: null,
     created_at: new Date().toISOString()
@@ -248,6 +310,25 @@ export async function voidLedgerEntryAction(formData: FormData) {
 
   entry.status = "voided";
   entry.void_reason = reason;
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function deleteLedgerEntryAction(formData: FormData) {
+  const { state } = await requireAdmin();
+  const entryId = String(formData.get("entry_id") ?? "");
+  const confirmation = String(formData.get("confirm_delete") ?? "");
+
+  if (confirmation !== "permanent") {
+    throw new Error("Dauerhaftes Loeschen wurde nicht bestaetigt.");
+  }
+
+  const entryIndex = state.ledger.findIndex((entry) => entry.id === entryId);
+  if (entryIndex < 0) {
+    throw new Error("Buchung fehlt.");
+  }
+
+  state.ledger.splice(entryIndex, 1);
   await saveTeamState(state);
   revalidateAll();
 }

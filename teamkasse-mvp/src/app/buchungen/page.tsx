@@ -23,7 +23,11 @@ export default async function BookingsPage() {
       <PageHeader
         eyebrow="Historie"
         title={isAdmin ? "Alle Buchungen" : "Meine Buchungen"}
-        description="Stornierte Eintraege bleiben sichtbar, damit die Kasse nachvollziehbar bleibt."
+        description={
+          isAdmin
+            ? "Stornieren bleibt nachvollziehbar. Dauerhaftes Loeschen entfernt einen Eintrag vollstaendig."
+            : "Stornierte Eintraege bleiben sichtbar, damit die Kasse nachvollziehbar bleibt."
+        }
       />
       <LedgerTable entries={data.ledger} team={data.team} canVoid={isAdmin} disabled={data.isDemo} />
     </div>
