@@ -32,10 +32,8 @@ export default async function AdminPage() {
       />
 
       <BookingForm members={data.members} catalog={data.catalog} team={data.team} disabled={data.isDemo} />
-      <div className="admin-grid">
-        <MemberManager members={data.members} disabled={data.isDemo} />
-        <CatalogManager catalog={data.catalog} team={data.team} disabled={data.isDemo} />
-      </div>
+      <CatalogManager catalog={data.catalog} team={data.team} disabled={data.isDemo} />
+      <MemberManager members={data.members} disabled={data.isDemo} />
       <LedgerTable entries={data.ledger.slice(0, 12)} team={data.team} canVoid disabled={data.isDemo} />
     </div>
   );

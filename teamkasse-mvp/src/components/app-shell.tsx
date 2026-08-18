@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ClipboardList, LayoutDashboard, LogIn, LogOut, ReceiptText, ShieldCheck } from "lucide-react";
+import { ClipboardList, KeyRound, LayoutDashboard, LogIn, LogOut, ReceiptText, ShieldCheck } from "lucide-react";
 import { logoutAction } from "@/app/actions";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { AppData } from "@/lib/types";
 
 type ShellContext = Pick<AppData, "isDemo" | "authState" | "team" | "currentMember">;
@@ -13,10 +14,10 @@ export function AppShell({ children, context }: { children: ReactNode; context: 
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <Link href="/dashboard" className="brand" aria-label="Teamkasse Dashboard">
-          <span className="brand-mark">TK</span>
+        <Link href="/dashboard" className="brand" aria-label="TURA App Dashboard">
+          <span className="brand-mark">TA</span>
           <span>
-            <strong>{context.team?.name ?? "Teamkasse"}</strong>
+            <strong>TURA App</strong>
             <small>{context.isDemo ? "Setup fehlt" : context.currentMember?.display_name ?? "PWA"}</small>
           </span>
         </Link>
@@ -28,6 +29,7 @@ export function AppShell({ children, context }: { children: ReactNode; context: 
               {isAdmin ? <NavLink href="/admin" icon={<ShieldCheck size={18} />} label="Admin" /> : null}
               <NavLink href="/buchungen" icon={<ReceiptText size={18} />} label="Buchungen" />
               <NavLink href="/katalog" icon={<ClipboardList size={18} />} label="Katalog" />
+              {!isAdmin ? <NavLink href="/profil" icon={<KeyRound size={18} />} label="Profil" /> : null}
             </>
           ) : (
             <NavLink href="/login" icon={<LogIn size={18} />} label="Login" />
@@ -35,6 +37,7 @@ export function AppShell({ children, context }: { children: ReactNode; context: 
         </nav>
 
         <div className="sidebar-footer">
+          <ThemeToggle />
           {context.isDemo ? <span className="demo-chip">Login-Setup fehlt</span> : null}
           {!context.isDemo && context.authState === "member" ? (
             <form action={logoutAction}>

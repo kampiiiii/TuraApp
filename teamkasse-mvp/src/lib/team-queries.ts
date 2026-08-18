@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getCurrentSession, isAuthConfigured } from "@/lib/auth";
 import {
   attachLedgerNames,
@@ -7,8 +8,10 @@ import {
 } from "@/lib/team-store";
 import type { AppData, AuthState } from "@/lib/types";
 
-export async function getAppData(): Promise<AppData> {
-  const state = await loadTeamState();
+const loadRequestState = cache(loadTeamState);
+
+export const getAppData = cache(async function getAppData(): Promise<AppData> {
+  const state = await loadRequestState();
 
   if (!isAuthConfigured()) {
     return emptyData("setup-required", state.team);
@@ -43,7 +46,7 @@ export async function getAppData(): Promise<AppData> {
     ledger: visibleLedger.sort((left, right) => right.created_at.localeCompare(left.created_at)).slice(0, 100),
     balances: visibleBalances
   };
-}
+});
 
 export async function getShellData() {
   const data = await getAppData();
@@ -56,15 +59,15 @@ export async function getShellData() {
   };
 }
 
-export async function getLoginData() {
-  const state = await loadTeamState();
+export const getLoginData = cache(async function getLoginData() {
+  const state = await loadRequestState();
 
   return {
     configured: isAuthConfigured(),
     team: state.team,
     members: publicMembers(state.members.filter((member) => member.active && member.role === "player"))
   };
-}
+});
 
 function emptyData(authState: AuthState, team: AppData["team"]): AppData {
   return {

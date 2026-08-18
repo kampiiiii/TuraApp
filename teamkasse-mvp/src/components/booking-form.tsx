@@ -15,6 +15,8 @@ export function BookingForm({
   disabled?: boolean;
 }) {
   const players = members.filter((member) => member.active && member.role === "player");
+  const fines = catalog.filter((item) => item.active && item.type === "fine");
+  const drinks = catalog.filter((item) => item.active && item.type === "drink");
 
   return (
     <section className="admin-panel">
@@ -50,13 +52,20 @@ export function BookingForm({
           Katalog
           <select name="catalog_item_id" disabled={disabled}>
             <option value="">Manuell oder Zahlung</option>
-            {catalog
-              .filter((item) => item.active)
-              .map((item) => (
+            <optgroup label="Strafen">
+              {fines.map((item) => (
                 <option value={item.id} key={item.id}>
-                  {item.type === "fine" ? "Strafe" : "Getraenk"}: {item.name} ({formatMoney(item.amount_cents, team?.currency)})
+                  {item.name} ({formatMoney(item.amount_cents, team?.currency)})
                 </option>
               ))}
+            </optgroup>
+            <optgroup label="Getraenke">
+              {drinks.map((item) => (
+                <option value={item.id} key={item.id}>
+                  {item.name} ({formatMoney(item.amount_cents, team?.currency)})
+                </option>
+              ))}
+            </optgroup>
           </select>
         </label>
 

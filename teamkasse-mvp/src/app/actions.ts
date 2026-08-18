@@ -15,6 +15,11 @@ import { parseEuroToCents, parseQuantity } from "@/lib/money";
 import { attachLedgerNames, loadTeamState, saveTeamState } from "@/lib/team-store";
 import type { CatalogType, LedgerType, StoredTeamMember } from "@/lib/types";
 
+export type PinChangeState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
 export async function loginAdminAction(formData: FormData) {
   const password = String(formData.get("admin_password") ?? "");
 
@@ -101,6 +106,38 @@ export async function setMemberPinAction(formData: FormData) {
   member.pin_hash = hashPin(accessPin);
   await saveTeamState(state);
   revalidateAll();
+}
+
+export async function changeOwnPinAction(
+  _previousState: PinChangeState,
+  formData: FormData
+): Promise<PinChangeState> {
+  const { state, member } = await requireMember();
+  const currentPin = String(formData.get("current_pin") ?? "").trim();
+  const newPin = String(formData.get("new_pin") ?? "").trim();
+  const confirmPin = String(formData.get("confirm_pin") ?? "").trim();
+
+  if (member.role !== "player") {
+    return { status: "error", message: "Diese Funktion ist fuer Spieler-PINs vorgesehen." };
+  }
+
+  if (!verifyPin(currentPin, member.pin_hash)) {
+    return { status: "error", message: "Die bisherige PIN stimmt nicht." };
+  }
+
+  if (newPin.length < 4) {
+    return { status: "error", message: "Die neue PIN muss mindestens 4 Zeichen haben." };
+  }
+
+  if (newPin !== confirmPin) {
+    return { status: "error", message: "Die beiden neuen PINs stimmen nicht ueberein." };
+  }
+
+  member.pin_hash = hashPin(newPin);
+  await saveTeamState(state);
+  revalidatePath("/profil");
+
+  return { status: "success", message: "Deine PIN wurde geaendert." };
 }
 
 export async function createCatalogItemAction(formData: FormData) {
@@ -233,6 +270,23 @@ async function requireAdmin() {
   return { state, member };
 }
 
+async function requireMember() {
+  if (!isAuthConfigured()) {
+    throw new Error("Login ist noch nicht eingerichtet.");
+  }
+
+  const state = await loadTeamState();
+  const { getCurrentSession } = await import("@/lib/auth");
+  const session = await getCurrentSession(state);
+  const member = state.members.find((candidate) => candidate.id === session?.memberId && candidate.active);
+
+  if (!member) {
+    throw new Error("Bitte erneut anmelden.");
+  }
+
+  return { state, member };
+}
+
 function normalizeCatalogType(value: FormDataEntryValue | null): CatalogType {
   return value === "drink" ? "drink" : "fine";
 }
@@ -250,5 +304,6 @@ function revalidateAll() {
   revalidatePath("/admin");
   revalidatePath("/buchungen");
   revalidatePath("/katalog");
+  revalidatePath("/profil");
   revalidatePath("/login");
 }

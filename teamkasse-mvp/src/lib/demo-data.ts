@@ -2,9 +2,9 @@ import type { AppData, CatalogItem, LedgerEntry, MemberBalance, Team, TeamMember
 
 const team: Team = {
   id: "demo-team",
-  name: "FC Beispiel",
+  name: "TURA App",
   currency: "EUR",
-  bank_account_holder: "FC Beispiel Mannschaftskasse",
+  bank_account_holder: "TURA Mannschaftskasse",
   bank_iban: "DE02120300000000202051",
   bank_bic: "BYLADEM1001"
 };

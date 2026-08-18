@@ -1,8 +1,10 @@
 node_modules
 .next
+.teamkasse
 .open-next
 .vercel
 .wrangler
+tsconfig.tsbuildinfo
 .dev.vars
 .env
 .env.local
@@ -11,6 +13,3 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
-.teamkasse
-tsconfig.tsbuildinfo

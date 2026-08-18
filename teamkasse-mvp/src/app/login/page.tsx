@@ -12,7 +12,7 @@ export default async function LoginPage() {
       <PageHeader
         eyebrow="Login"
         title="Mannschaft anmelden"
-        description="Admin und Spieler haben getrennte Zugänge. Der Kassenwart vergibt die Spieler-PINs."
+        description="Admin und Spieler haben getrennte Zugaenge. Der Kassenwart vergibt die Spieler-PINs."
       />
       <LoginForm configured={data.configured} members={data.members} />
     </div>

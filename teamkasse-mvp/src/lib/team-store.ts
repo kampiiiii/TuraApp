@@ -2,7 +2,7 @@ import { getStore } from "@netlify/blobs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { demoData } from "@/lib/demo-data";
-import type { CatalogItem, LedgerEntry, StoredTeamMember, TeamState } from "@/lib/types";
+import type { CatalogItem, LedgerEntry, MemberBalance, StoredTeamMember, TeamState } from "@/lib/types";
 
 const STORE_NAME = "teamkasse";
 const STATE_KEY = "state.json";
@@ -50,28 +50,48 @@ export function publicMembers(members: StoredTeamMember[]) {
   return members.map(({ pin_hash: _pinHash, ...member }) => member);
 }
 
-export function calculateBalances(state: TeamState) {
-  return state.members
-    .filter((member) => member.active && member.role === "player")
-    .map((member) => {
-      const entries = state.ledger.filter((entry) => entry.member_id === member.id && entry.status !== "voided");
-      const sum = (predicate: (entry: LedgerEntry) => boolean) =>
-        entries.filter(predicate).reduce((total, entry) => total + entry.total_amount_cents, 0);
+export function calculateBalances(state: TeamState): MemberBalance[] {
+  const balances = new Map<string, MemberBalance>();
 
-      return {
-        team_id: state.team.id,
-        member_id: member.id,
-        display_name: member.display_name,
-        fine_cents: sum((entry) => entry.type === "fine"),
-        drink_cents: sum((entry) => entry.type === "drink"),
-        adjustment_cents: sum((entry) => entry.type === "adjustment"),
-        payment_cents: -sum((entry) => entry.type === "payment"),
-        open_charge_cents: entries
-          .filter((entry) => entry.status === "open" && entry.type !== "payment")
-          .reduce((total, entry) => total + entry.total_amount_cents, 0),
-        balance_cents: sum(() => true)
-      };
+  for (const member of state.members) {
+    if (!member.active || member.role !== "player") {
+      continue;
+    }
+
+    balances.set(member.id, {
+      team_id: state.team.id,
+      member_id: member.id,
+      display_name: member.display_name,
+      fine_cents: 0,
+      drink_cents: 0,
+      adjustment_cents: 0,
+      payment_cents: 0,
+      open_charge_cents: 0,
+      balance_cents: 0
     });
+  }
+
+  for (const entry of state.ledger) {
+    if (entry.status === "voided") {
+      continue;
+    }
+
+    const balance = balances.get(entry.member_id);
+    if (!balance) {
+      continue;
+    }
+
+    if (entry.type === "fine") balance.fine_cents += entry.total_amount_cents;
+    if (entry.type === "drink") balance.drink_cents += entry.total_amount_cents;
+    if (entry.type === "adjustment") balance.adjustment_cents += entry.total_amount_cents;
+    if (entry.type === "payment") balance.payment_cents -= entry.total_amount_cents;
+    if (entry.status === "open" && entry.type !== "payment") {
+      balance.open_charge_cents += entry.total_amount_cents;
+    }
+    balance.balance_cents += entry.total_amount_cents;
+  }
+
+  return Array.from(balances.values());
 }
 
 export function attachLedgerNames(
