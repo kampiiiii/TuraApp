@@ -1,7 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { revalidatePath } from "next/cache";
+import { refresh, revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   clearSessionCookie,
@@ -141,6 +141,7 @@ export async function changeOwnPinAction(
   member.pin_hash = hashPin(newPin);
   await saveTeamState(state);
   revalidatePath("/profil");
+  refresh();
 
   return { status: "success", message: "Deine PIN wurde geaendert." };
 }
@@ -220,6 +221,7 @@ export async function createSelfDrinkAction(
   await saveTeamState(state);
   revalidatePath("/dashboard");
   revalidatePath("/buchungen");
+  refresh();
 
   return { status: "success", message: `${quantityRaw} x ${drink.name} wurde sofort gebucht.` };
 }
@@ -387,4 +389,5 @@ function revalidateAll() {
   revalidatePath("/katalog");
   revalidatePath("/profil");
   revalidatePath("/login");
+  refresh();
 }
