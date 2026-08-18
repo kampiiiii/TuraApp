@@ -3,6 +3,7 @@ import { getCurrentSession, isAuthConfigured, isPlayerRegistrationConfigured } f
 import {
   attachLedgerNames,
   calculateBalances,
+  calculateTreasury,
   loadTeamState,
   publicMembers
 } from "@/lib/team-store";
@@ -45,7 +46,8 @@ export const getAppData = cache(async function getAppData(): Promise<AppData> {
     members: publicMembers(visibleMembers),
     catalog: state.catalog,
     ledger: visibleLedger.sort((left, right) => right.created_at.localeCompare(left.created_at)).slice(0, 100),
-    balances: visibleBalances
+    balances: visibleBalances,
+    treasury: isAdmin ? calculateTreasury(state) : emptyTreasury()
   };
 });
 
@@ -80,6 +82,21 @@ function emptyData(authState: AuthState, team: AppData["team"]): AppData {
     members: [],
     catalog: [],
     ledger: [],
-    balances: []
+    balances: [],
+    treasury: emptyTreasury()
+  };
+}
+
+function emptyTreasury() {
+  return {
+    summary: {
+      balance_set_cents: 0,
+      player_payments_cents: 0,
+      other_income_cents: 0,
+      expenses_cents: 0,
+      current_balance_cents: 0,
+      balance_set_at: null
+    },
+    entries: []
   };
 }

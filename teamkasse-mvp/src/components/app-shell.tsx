@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ClipboardList, KeyRound, LayoutDashboard, LogIn, LogOut, ReceiptText, ShieldCheck } from "lucide-react";
+import { ClipboardList, KeyRound, LayoutDashboard, LogIn, LogOut, ReceiptText, ShieldCheck, WalletCards } from "lucide-react";
 import { logoutAction } from "@/app/actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 import type { AppData } from "@/lib/types";
@@ -27,6 +27,7 @@ export function AppShell({ children, context }: { children: ReactNode; context: 
             <>
               <NavLink href="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" />
               {isAdmin ? <NavLink href="/admin" icon={<ShieldCheck size={18} />} label="Admin" /> : null}
+              {isAdmin ? <NavLink href="/kasse" icon={<WalletCards size={18} />} label="Kasse" /> : null}
               <NavLink href="/buchungen" icon={<ReceiptText size={18} />} label="Buchungen" />
               <NavLink href="/katalog" icon={<ClipboardList size={18} />} label="Katalog" />
               {!isAdmin ? <NavLink href="/profil" icon={<KeyRound size={18} />} label="Profil" /> : null}

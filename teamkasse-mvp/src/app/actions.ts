@@ -15,7 +15,7 @@ import {
 } from "@/lib/auth";
 import { parseEuroToCents, parseQuantity } from "@/lib/money";
 import { attachLedgerNames, loadTeamState, saveTeamState } from "@/lib/team-store";
-import type { CatalogItem, CatalogType, LedgerType, StoredTeamMember } from "@/lib/types";
+import type { CatalogItem, CatalogType, LedgerType, StoredTeamMember, TreasuryEntryType } from "@/lib/types";
 
 export type PinChangeState = {
   status: "idle" | "success" | "error";
@@ -548,6 +548,75 @@ export async function createLedgerEntryAction(formData: FormData) {
   revalidateAll();
 }
 
+export async function createTreasuryEntryAction(formData: FormData) {
+  const { state, member: admin } = await requireAdmin();
+  const type = normalizeTreasuryEntryType(formData.get("type"));
+  const submittedDescription = String(formData.get("description") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const bookingDate = String(formData.get("booking_date") ?? "").trim() || new Date().toISOString().slice(0, 10);
+  const parsedAmountCents = parseEuroToCents(formData.get("amount"));
+  const amountCents = Math.abs(parsedAmountCents);
+
+  if (type !== "balance" && amountCents <= 0) {
+    throw new Error("Bitte einen Betrag groesser als 0 eingeben.");
+  }
+
+  const defaultDescription =
+    type === "balance" ? "Kassenbestand festgelegt" : type === "expense" ? "Ausgabe" : "Sonstige Einnahme";
+
+  state.treasury_entries.unshift({
+    id: randomUUID(),
+    team_id: state.team.id,
+    type,
+    description: submittedDescription || defaultDescription,
+    amount_cents: type === "expense" ? -amountCents : amountCents,
+    booking_date: bookingDate,
+    notes,
+    status: "active",
+    created_by_member_id: admin.id,
+    created_by_name: admin.display_name,
+    void_reason: null,
+    created_at: new Date().toISOString()
+  });
+
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function voidTreasuryEntryAction(formData: FormData) {
+  const { state } = await requireAdmin();
+  const entryId = String(formData.get("entry_id") ?? "");
+  const entry = state.treasury_entries.find((candidate) => candidate.id === entryId);
+
+  if (!entry) {
+    throw new Error("Kassenbucheintrag wurde nicht gefunden.");
+  }
+
+  entry.status = "voided";
+  entry.void_reason = "Fehleintrag storniert";
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function deleteTreasuryEntryAction(formData: FormData) {
+  const { state } = await requireAdmin();
+  const entryId = String(formData.get("entry_id") ?? "");
+  const confirmation = String(formData.get("confirm_delete") ?? "");
+
+  if (confirmation !== "delete-treasury-entry") {
+    throw new Error("Das Loeschen wurde nicht bestaetigt.");
+  }
+
+  const entryIndex = state.treasury_entries.findIndex((entry) => entry.id === entryId);
+  if (entryIndex < 0) {
+    throw new Error("Kassenbucheintrag wurde nicht gefunden.");
+  }
+
+  state.treasury_entries.splice(entryIndex, 1);
+  await saveTeamState(state);
+  revalidateAll();
+}
+
 export async function voidLedgerEntryAction(formData: FormData) {
   const { state } = await requireAdmin();
   const entryId = String(formData.get("entry_id") ?? "");
@@ -651,6 +720,14 @@ function normalizeLedgerType(value: FormDataEntryValue | null): LedgerType {
   return "fine";
 }
 
+function normalizeTreasuryEntryType(value: FormDataEntryValue | null): TreasuryEntryType {
+  if (value === "balance" || value === "income") {
+    return value;
+  }
+
+  return "expense";
+}
+
 function normalizeMemberName(value: FormDataEntryValue | null) {
   return String(value ?? "").trim().replace(/\s+/g, " ");
 }
@@ -670,6 +747,7 @@ function revalidateAll() {
   revalidatePath("/buchungen");
   revalidatePath("/katalog");
   revalidatePath("/profil");
+  revalidatePath("/kasse");
   revalidatePath("/login");
   refresh();
 }

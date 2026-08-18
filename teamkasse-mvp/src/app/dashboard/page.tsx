@@ -7,6 +7,7 @@ import { InKindObligationList } from "@/components/in-kind-obligation-list";
 import { MemberBalanceTable } from "@/components/member-balance-table";
 import { PageHeader } from "@/components/page-header";
 import { SelfDrinkForm } from "@/components/self-drink-form";
+import { TreasurySummary } from "@/components/treasury-summary";
 import { formatMoney } from "@/lib/money";
 import { getAppData } from "@/lib/team-queries";
 
@@ -44,6 +45,8 @@ export default async function DashboardPage() {
         team={data.team}
         currentMemberId={isAdmin ? undefined : data.currentMember?.id}
       />
+
+      {isAdmin ? <TreasurySummary summary={data.treasury.summary} team={data.team} /> : null}
 
       {!isAdmin && currentBalance ? (
         <section className="pay-preview">

@@ -1,6 +1,6 @@
 # Teamkasse MVP
 
-Kostenlose MVP-Web-App/PWA fuer eine Fussballmannschaft: Strafen, Getraenke, Zahlungen und nachvollziehbare Korrekturen.
+Kostenlose MVP-Web-App/PWA fuer eine Fussballmannschaft: Strafen, Getraenke, Zahlungen, Kassenbuch und nachvollziehbare Korrekturen.
 
 ## Stack
 
@@ -49,6 +49,7 @@ Netlify-Einstellungen:
 
 - Rollen: Admin/Kassenwart und Spieler
 - Admin: Spieler und Rollen verwalten, Katalog sortieren oder Eintraege daraus loeschen, Strafen/Getraenke/Zahlungen buchen, Sachleistungen abhaken sowie Buchungen stornieren oder loeschen
+- Kassenbuch: aktuellen Bestand festlegen, Spielerzahlungen automatisch uebernehmen und sonstige Einnahmen oder Ausgaben buchen
 - Spieler: eigene Buchungen, Zahlungen, Sachleistungen, Summen und Gesamtsaldo sehen sowie die eigene PIN aendern
 - Neue Spieler: eigener Zugang per Mannschaftscode, Name und PIN
 - Historie: geloeschte Spieler werden aus dem Login entfernt, ihre vorhandenen Buchungen und Salden bleiben erhalten

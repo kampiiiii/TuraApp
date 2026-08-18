@@ -2,7 +2,15 @@ import { getStore } from "@netlify/blobs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { demoData } from "@/lib/demo-data";
-import type { CatalogItem, LedgerEntry, MemberBalance, StoredTeamMember, TeamState } from "@/lib/types";
+import type {
+  CatalogItem,
+  LedgerEntry,
+  MemberBalance,
+  StoredTeamMember,
+  TeamState,
+  TreasuryBookEntry,
+  TreasuryData
+} from "@/lib/types";
 
 const STORE_NAME = "teamkasse";
 const STATE_KEY = "state.json";
@@ -42,7 +50,8 @@ export function createInitialTeamState(): TeamState {
       pin_hash: null
     })),
     catalog: demoData.catalog,
-    ledger: demoData.ledger
+    ledger: demoData.ledger,
+    treasury_entries: []
   });
 }
 
@@ -161,6 +170,80 @@ export function calculateBalances(state: TeamState, memberId?: string): MemberBa
   }));
 }
 
+export function calculateTreasury(state: TeamState): TreasuryData {
+  const activeBalanceEntries = state.treasury_entries
+    .filter((entry) => entry.status === "active" && entry.type === "balance")
+    .sort((left, right) => right.created_at.localeCompare(left.created_at));
+  const balanceEntry = activeBalanceEntries[0] ?? null;
+  const isAfterBalance = (bookingDate: string, createdAt: string) =>
+    !balanceEntry ||
+    bookingDate > balanceEntry.booking_date ||
+    (bookingDate === balanceEntry.booking_date && createdAt > balanceEntry.created_at);
+  const memberNames = new Map(state.members.map((member) => [member.id, member.display_name]));
+
+  const manualEntries: TreasuryBookEntry[] = state.treasury_entries.map((entry) => ({
+    id: entry.id,
+    type: entry.type,
+    description: entry.description,
+    member_name: null,
+    amount_cents: entry.amount_cents,
+    booking_date: entry.booking_date,
+    notes: entry.notes,
+    status: entry.status,
+    source: "manual",
+    included_in_balance:
+      entry.status === "active" &&
+      (entry.type === "balance"
+        ? entry.id === balanceEntry?.id
+        : isAfterBalance(entry.booking_date, entry.created_at)),
+    created_at: entry.created_at
+  }));
+
+  const paymentEntries: TreasuryBookEntry[] = state.ledger
+    .filter((entry) => entry.type === "payment")
+    .map((entry) => ({
+      id: entry.id,
+      type: "player_payment",
+      description: entry.description,
+      member_name: memberNames.get(entry.member_id) ?? entry.member_name,
+      amount_cents: Math.abs(entry.total_amount_cents),
+      booking_date: entry.booking_date,
+      notes: entry.notes,
+      status: entry.status === "voided" ? "voided" : "active",
+      source: "ledger",
+      included_in_balance:
+        entry.status !== "voided" && isAfterBalance(entry.booking_date, entry.created_at),
+      created_at: entry.created_at
+    }));
+
+  const entries = [...manualEntries, ...paymentEntries].sort(
+    (left, right) => right.created_at.localeCompare(left.created_at)
+  );
+  const includedEntries = entries.filter((entry) => entry.included_in_balance);
+  const balanceSetCents = balanceEntry?.amount_cents ?? 0;
+  const playerPaymentsCents = sumTreasuryEntries(includedEntries, "player_payment");
+  const otherIncomeCents = sumTreasuryEntries(includedEntries, "income");
+  const expensesCents = Math.abs(sumTreasuryEntries(includedEntries, "expense"));
+
+  return {
+    summary: {
+      balance_set_cents: balanceSetCents,
+      player_payments_cents: playerPaymentsCents,
+      other_income_cents: otherIncomeCents,
+      expenses_cents: expensesCents,
+      current_balance_cents: balanceSetCents + playerPaymentsCents + otherIncomeCents - expensesCents,
+      balance_set_at: balanceEntry?.created_at ?? null
+    },
+    entries
+  };
+}
+
+function sumTreasuryEntries(entries: TreasuryBookEntry[], type: TreasuryBookEntry["type"]) {
+  return entries
+    .filter((entry) => entry.type === type)
+    .reduce((total, entry) => total + entry.amount_cents, 0);
+}
+
 export function attachLedgerNames(
   ledger: LedgerEntry[],
   members: StoredTeamMember[],
@@ -210,7 +293,7 @@ function normalizeState(state: TeamState): TeamState {
   }));
 
   return {
-    version: state.version || 1,
+    version: Math.max(state.version || 1, 2),
     team: {
       ...state.team,
       currency: state.team.currency || "EUR"
@@ -227,7 +310,15 @@ function normalizeState(state: TeamState): TeamState {
       in_kind_label: item.in_kind_label ?? null,
       active: item.active !== false
     })),
-    ledger: allocatePayments(normalizedLedger)
+    ledger: allocatePayments(normalizedLedger),
+    treasury_entries: (state.treasury_entries ?? []).map((entry) => ({
+      ...entry,
+      notes: entry.notes ?? null,
+      status: entry.status === "voided" ? "voided" : "active",
+      created_by_member_id: entry.created_by_member_id ?? null,
+      created_by_name: entry.created_by_name ?? null,
+      void_reason: entry.void_reason ?? null
+    }))
   };
 }
 
