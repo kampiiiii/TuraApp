@@ -1,7 +1,7 @@
 export type AppRole = "admin" | "player";
 export type CatalogType = "fine" | "drink";
 export type LedgerType = "fine" | "drink" | "payment" | "adjustment";
-export type LedgerStatus = "open" | "paid" | "voided";
+export type LedgerStatus = "open" | "partial" | "paid" | "voided";
 export type BookingSource = "admin" | "player";
 export type AuthState = "setup-required" | "anonymous" | "member" | "no-team";
 
@@ -51,6 +51,7 @@ export type LedgerEntry = {
   quantity: number;
   unit_amount_cents: number;
   total_amount_cents: number;
+  settled_amount_cents: number;
   status: LedgerStatus;
   booking_date: string;
   notes: string | null;

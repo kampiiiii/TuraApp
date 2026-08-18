@@ -19,6 +19,8 @@ Die Typen liegen in `src/lib/types.ts`. Der Zugriff auf den Speicher liegt in `s
 
 - Positive Betraege erhoehen die Schuld.
 - Zahlungen werden als negativer Betrag gespeichert.
+- Negative Zahlungen werden automatisch auf die aeltesten positiven Buchungen desselben Spielers verteilt.
+- `settled_amount_cents` speichert den angerechneten Betrag; daraus entstehen die Status `open`, `partial` und `paid`.
 - Buchungen koennen storniert oder durch einen Admin dauerhaft geloescht werden.
 - Sachleistungen wie `1 Kiste Bier` werden unabhaengig vom Geldbetrag als offen oder mitgebracht gespeichert.
 - Beim Loeschen eines Spielers bleiben dessen Ledger-Eintraege mit gespeichertem Namen erhalten.

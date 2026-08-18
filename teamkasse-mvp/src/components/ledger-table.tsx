@@ -65,7 +65,14 @@ export function LedgerTable({
                   </span>
                 </td>
                 <td data-label="Menge">{entry.quantity}</td>
-                <td data-label="Betrag">{formatMoney(entry.total_amount_cents, team?.currency)}</td>
+                <td data-label="Betrag">
+                  <span className="stacked-cell">
+                    <strong>{formatMoney(entry.total_amount_cents, team?.currency)}</strong>
+                    {entry.status === "partial" ? (
+                      <small>Noch offen: {formatMoney(entry.total_amount_cents - entry.settled_amount_cents, team?.currency)}</small>
+                    ) : null}
+                  </span>
+                </td>
                 <td data-label="Status">
                   <StatusPill status={entry.status} />
                 </td>

@@ -25,7 +25,7 @@ export default async function DashboardPage() {
 
   const isAdmin = data.currentMember?.role === "admin";
   const currentBalance = data.balances.find((balance) => balance.member_id === data.currentMember?.id);
-  const openEntries = data.ledger.filter((entry) => entry.status === "open");
+  const openEntries = data.ledger.filter((entry) => entry.status === "open" || entry.status === "partial");
 
   return (
     <div className="page-stack">

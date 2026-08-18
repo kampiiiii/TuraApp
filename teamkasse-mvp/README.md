@@ -52,6 +52,7 @@ Netlify-Einstellungen:
 - Spieler: eigene Buchungen, Zahlungen, Sachleistungen, Summen und Gesamtsaldo sehen sowie die eigene PIN aendern
 - Neue Spieler: eigener Zugang per Mannschaftscode, Name und PIN
 - Historie: geloeschte Spieler werden aus dem Login entfernt, ihre vorhandenen Buchungen und Salden bleiben erhalten
+- Zahlungen werden automatisch auf die aeltesten offenen Buchungen eines Spielers verteilt; Status: offen, teilbezahlt oder bezahlt
 - Server-Aktionen pruefen Adminrechte, Spieler bekommen nur eigene Daten
 - PWA-Grundlage: Manifest, Icon, Offline-Fallback, Service Worker
 

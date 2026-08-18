@@ -14,8 +14,9 @@
 2. Spieler-PIN setzen oder direkt beim Anlegen vergeben.
 3. Katalogposition anlegen oder vorhandene Position nutzen.
 4. Spieler waehlen und Strafe, Getraenk, Zahlung oder Anpassung buchen.
-5. Mitgebrachte Sachleistungen abhaken.
-6. Falsche Eintraege stornieren oder bei Bedarf dauerhaft loeschen.
+5. Eine Zahlung wird automatisch auf die aeltesten offenen Buchungen des Spielers angerechnet.
+6. Mitgebrachte Sachleistungen abhaken.
+7. Falsche Eintraege stornieren oder bei Bedarf dauerhaft loeschen.
 
 ## MVP-Workflow Spieler
 

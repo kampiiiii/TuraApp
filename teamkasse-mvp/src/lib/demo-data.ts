@@ -95,6 +95,7 @@ const ledger: LedgerEntry[] = [
     quantity: 1,
     unit_amount_cents: 500,
     total_amount_cents: 500,
+    settled_amount_cents: 0,
     status: "open",
     booking_date: "2026-08-12",
     notes: "Training Mittwoch",
@@ -121,6 +122,7 @@ const ledger: LedgerEntry[] = [
     quantity: 3,
     unit_amount_cents: 250,
     total_amount_cents: 750,
+    settled_amount_cents: 0,
     status: "open",
     booking_date: "2026-08-14",
     notes: null,
@@ -147,6 +149,7 @@ const ledger: LedgerEntry[] = [
     quantity: 1,
     unit_amount_cents: -1000,
     total_amount_cents: -1000,
+    settled_amount_cents: 1000,
     status: "paid",
     booking_date: "2026-08-15",
     notes: "Bar",
@@ -179,8 +182,8 @@ const balances: MemberBalance[] = members
       adjustment_cents: sum((entry) => entry.type === "adjustment"),
       payment_cents: -sum((entry) => entry.type === "payment"),
       open_charge_cents: entries
-        .filter((entry) => entry.status === "open" && entry.type !== "payment")
-        .reduce((total, entry) => total + entry.total_amount_cents, 0),
+        .filter((entry) => entry.type !== "payment" && entry.total_amount_cents > 0)
+        .reduce((total, entry) => total + Math.max(0, entry.total_amount_cents - entry.settled_amount_cents), 0),
       balance_cents: sum(() => true)
     };
   });

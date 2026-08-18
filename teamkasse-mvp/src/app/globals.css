@@ -595,6 +595,11 @@ tbody tr:hover {
   background: var(--ok-soft);
 }
 
+.status-pill.partial {
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+}
+
 .status-pill.voided {
   color: var(--danger);
   background: var(--danger-soft);
