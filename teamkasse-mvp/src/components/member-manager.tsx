@@ -1,8 +1,17 @@
-import { Plus } from "lucide-react";
-import { createMemberAction, setMemberPinAction } from "@/app/actions";
+import { Plus, Save } from "lucide-react";
+import { createMemberAction, setMemberPinAction, updateMemberRoleAction } from "@/app/actions";
+import { DeleteMemberButton } from "@/components/delete-member-button";
 import type { TeamMember } from "@/lib/types";
 
-export function MemberManager({ members, disabled = false }: { members: TeamMember[]; disabled?: boolean }) {
+export function MemberManager({
+  members,
+  currentMemberId,
+  disabled = false
+}: {
+  members: TeamMember[];
+  currentMemberId?: string;
+  disabled?: boolean;
+}) {
   return (
     <section className="admin-panel">
       <div className="section-title-row">
@@ -39,11 +48,34 @@ export function MemberManager({ members, disabled = false }: { members: TeamMemb
       <div className="member-list">
         {members.map((member) => (
           <article key={member.id} className="member-chip">
-            <span>
-              {member.jersey_number ? <strong>#{member.jersey_number}</strong> : null}
-              {member.display_name}
-              <small>{member.role === "admin" ? "Admin" : "Spieler"}</small>
-            </span>
+            <div className="member-heading">
+              <span>
+                {member.jersey_number ? <strong>#{member.jersey_number} </strong> : null}
+                {member.display_name}
+              </span>
+              <small>{member.id === currentMemberId ? "Aktuelles Konto" : member.role === "admin" ? "Admin" : "Spieler"}</small>
+            </div>
+
+            <form action={updateMemberRoleAction} className="member-role-form">
+              <input type="hidden" name="member_id" value={member.id} />
+              <label>
+                Rolle
+                <select name="role" defaultValue={member.role} disabled={disabled || member.id === currentMemberId}>
+                  <option value="player">Spieler</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </label>
+              <button
+                className="icon-button align-end"
+                type="submit"
+                title="Rolle speichern"
+                aria-label="Rolle speichern"
+                disabled={disabled || member.id === currentMemberId}
+              >
+                <Save size={16} />
+              </button>
+            </form>
+
             <form action={setMemberPinAction} className="pin-form">
               <input type="hidden" name="member_id" value={member.id} />
               <input
@@ -58,6 +90,12 @@ export function MemberManager({ members, disabled = false }: { members: TeamMemb
                 PIN
               </button>
             </form>
+
+            <DeleteMemberButton
+              memberId={member.id}
+              memberName={member.display_name}
+              disabled={disabled || member.id === currentMemberId}
+            />
           </article>
         ))}
       </div>

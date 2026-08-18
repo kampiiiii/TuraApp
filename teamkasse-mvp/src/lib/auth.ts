@@ -15,6 +15,10 @@ export function isAuthConfigured() {
   return Boolean(process.env.TEAMKASSE_ADMIN_PASSWORD && process.env.TEAMKASSE_SESSION_SECRET);
 }
 
+export function isPlayerRegistrationConfigured() {
+  return Boolean(process.env.TEAMKASSE_JOIN_CODE?.trim());
+}
+
 export async function getCurrentSession(state: TeamState): Promise<Session | null> {
   if (!isAuthConfigured()) {
     return null;
@@ -82,6 +86,16 @@ export function verifyAdminPassword(password: string) {
   }
 
   return timingSafeStringEqual(password, configured);
+}
+
+export function verifyJoinCode(code: string) {
+  const configured = process.env.TEAMKASSE_JOIN_CODE?.trim();
+
+  if (!configured) {
+    return false;
+  }
+
+  return timingSafeStringEqual(code.trim(), configured);
 }
 
 export function hashPin(pin: string) {

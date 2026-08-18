@@ -52,9 +52,10 @@ export function publicMembers(members: StoredTeamMember[]) {
 
 export function calculateBalances(state: TeamState, memberId?: string): MemberBalance[] {
   const balances = new Map<string, MemberBalance>();
+  const membersById = new Map(state.members.map((member) => [member.id, member]));
 
   for (const member of state.members) {
-    if (!member.active || member.role !== "player" || (memberId && member.id !== memberId)) {
+    if (member.role !== "player" || (memberId && member.id !== memberId)) {
       continue;
     }
 
@@ -76,7 +77,23 @@ export function calculateBalances(state: TeamState, memberId?: string): MemberBa
       continue;
     }
 
-    const balance = balances.get(entry.member_id);
+    let balance = balances.get(entry.member_id);
+    if (!balance && !memberId) {
+      const storedMember = membersById.get(entry.member_id);
+      balance = {
+        team_id: state.team.id,
+        member_id: entry.member_id,
+        display_name: storedMember?.display_name ?? `${entry.member_name || "Unbekannt"} (geloescht)`,
+        fine_cents: 0,
+        drink_cents: 0,
+        adjustment_cents: 0,
+        payment_cents: 0,
+        open_charge_cents: 0,
+        balance_cents: 0
+      };
+      balances.set(entry.member_id, balance);
+    }
+
     if (!balance) {
       continue;
     }
@@ -104,7 +121,7 @@ export function attachLedgerNames(
 
   return ledger.map((entry) => ({
     ...entry,
-    member_name: memberNames.get(entry.member_id) ?? "Unbekannt",
+    member_name: memberNames.get(entry.member_id) ?? entry.member_name ?? "Unbekannt",
     catalog_item_name: entry.catalog_item_id ? catalogNames.get(entry.catalog_item_id) ?? null : null
   }));
 }

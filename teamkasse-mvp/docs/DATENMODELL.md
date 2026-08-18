@@ -19,7 +19,8 @@ Die Typen liegen in `src/lib/types.ts`. Der Zugriff auf den Speicher liegt in `s
 
 - Positive Betraege erhoehen die Schuld.
 - Zahlungen werden als negativer Betrag gespeichert.
-- Eintraege werden nicht geloescht, sondern mit `status = 'voided'` storniert.
+- Buchungen koennen storniert oder durch einen Admin dauerhaft geloescht werden.
+- Beim Loeschen eines Spielers bleiben dessen Ledger-Eintraege mit gespeichertem Namen erhalten.
 - Korrekturen koennen ueber `correction_of` auf eine Ursprungsbuchung zeigen.
 - `void_reason` und Zeitstempel machen Aenderungen nachvollziehbar.
 - Fuer spaetere Datenbank-Nutzung kann dieses Modell fast direkt in echte Tabellen ueberfuehrt werden.

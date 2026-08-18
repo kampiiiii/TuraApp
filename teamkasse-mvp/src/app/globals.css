@@ -310,6 +310,10 @@ select:disabled {
   max-width: 640px;
 }
 
+.page-stack.login-page {
+  max-width: 980px;
+}
+
 .page-header {
   display: grid;
   gap: 8px;
@@ -727,7 +731,7 @@ select:focus {
 }
 
 .member-list {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
 .member-chip,
@@ -739,8 +743,26 @@ select:focus {
 
 .member-chip {
   display: grid;
-  gap: 4px;
-  padding: 12px;
+  gap: 12px;
+  padding: 14px;
+}
+
+.member-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.member-heading small {
+  color: var(--brand-dark);
+  font-weight: 800;
+}
+
+.member-role-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 8px;
 }
 
 .pin-form {
@@ -748,6 +770,18 @@ select:focus {
   grid-template-columns: minmax(0, 1fr) 72px;
   gap: 8px;
   margin-top: 8px;
+}
+
+.member-delete-button {
+  justify-content: center;
+  width: 100%;
+  color: var(--danger);
+}
+
+.member-delete-button:hover {
+  border-color: color-mix(in srgb, var(--danger) 42%, var(--line));
+  color: var(--danger);
+  background: var(--danger-soft);
 }
 
 .catalog-columns {
@@ -870,9 +904,29 @@ select:focus {
   max-width: 980px;
 }
 
-.login-form {
+.login-form,
+.registration-form {
   display: grid;
   gap: 12px;
+}
+
+.registration-card {
+  grid-column: 1 / -1;
+}
+
+.registration-card > div {
+  display: grid;
+  gap: 6px;
+}
+
+.registration-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.registration-code,
+.registration-message,
+.registration-submit {
+  grid-column: 1 / -1;
 }
 
 .profile-panel {
@@ -1153,8 +1207,15 @@ select:focus {
   .booking-grid,
   .catalog-columns,
   .catalog-groups,
-  .login-grid {
+  .login-grid,
+  .registration-form {
     grid-template-columns: 1fr;
+  }
+
+  .registration-code,
+  .registration-message,
+  .registration-submit {
+    grid-column: auto;
   }
 
   .catalog-group + .catalog-group {

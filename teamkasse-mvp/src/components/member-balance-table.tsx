@@ -5,8 +5,8 @@ export function MemberBalanceTable({ balances, team }: { balances: MemberBalance
   return (
     <section className="table-section">
       <div className="section-title-row">
-        <h2>Spieleruebersicht</h2>
-        <span>{balances.length} aktive Spieler</span>
+        <h2>Mitgliederuebersicht</h2>
+        <span>{balances.length} Konten</span>
       </div>
       <div className="table-wrap">
         <table className="responsive-table">

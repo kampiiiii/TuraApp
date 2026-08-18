@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { getCurrentSession, isAuthConfigured } from "@/lib/auth";
+import { getCurrentSession, isAuthConfigured, isPlayerRegistrationConfigured } from "@/lib/auth";
 import {
   attachLedgerNames,
   calculateBalances,
@@ -65,8 +65,9 @@ export const getLoginData = cache(async function getLoginData() {
 
   return {
     configured: isAuthConfigured(),
+    registrationConfigured: isPlayerRegistrationConfigured(),
     team: state.team,
-    members: publicMembers(state.members.filter((member) => member.active && member.role === "player"))
+    members: publicMembers(state.members.filter((member) => member.active))
   };
 });
 

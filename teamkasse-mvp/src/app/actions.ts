@@ -7,8 +7,10 @@ import {
   clearSessionCookie,
   hashPin,
   isAuthConfigured,
+  isPlayerRegistrationConfigured,
   setSessionCookie,
   verifyAdminPassword,
+  verifyJoinCode,
   verifyPin
 } from "@/lib/auth";
 import { parseEuroToCents, parseQuantity } from "@/lib/money";
@@ -25,15 +27,23 @@ export type SelfDrinkState = {
   message: string;
 };
 
+export type RegistrationState = {
+  status: "idle" | "error";
+  message: string;
+};
+
 export async function loginAdminAction(formData: FormData) {
   const password = String(formData.get("admin_password") ?? "");
+  const memberId = String(formData.get("member_id") ?? "");
 
   if (!isAuthConfigured() || !verifyAdminPassword(password)) {
     throw new Error("Admin-Passwort stimmt nicht.");
   }
 
   const state = await loadTeamState();
-  const admin = state.members.find((member) => member.active && member.role === "admin");
+  const admin = state.members.find(
+    (member) => member.active && member.role === "admin" && (!memberId || member.id === memberId)
+  );
 
   if (!admin) {
     throw new Error("Kein Admin-Mitglied gefunden.");
@@ -52,12 +62,73 @@ export async function loginPlayerAction(formData: FormData) {
   }
 
   const state = await loadTeamState();
-  const member = state.members.find((candidate) => candidate.id === memberId && candidate.active);
+  const member = state.members.find(
+    (candidate) => candidate.id === memberId && candidate.active && candidate.role === "player"
+  );
 
   if (!member || !verifyPin(pin, member.pin_hash)) {
     throw new Error("Spieler oder PIN stimmt nicht.");
   }
 
+  await setSessionCookie(member);
+  redirect("/dashboard");
+}
+
+export async function registerPlayerAction(
+  _previousState: RegistrationState,
+  formData: FormData
+): Promise<RegistrationState> {
+  if (!isAuthConfigured() || !isPlayerRegistrationConfigured()) {
+    return { status: "error", message: "Die Selbstregistrierung ist noch nicht freigeschaltet." };
+  }
+
+  const joinCode = String(formData.get("join_code") ?? "");
+  const displayName = normalizeMemberName(formData.get("display_name"));
+  const jerseyNumberRaw = String(formData.get("jersey_number") ?? "").trim();
+  const pin = String(formData.get("pin") ?? "").trim();
+  const confirmPin = String(formData.get("confirm_pin") ?? "").trim();
+  const jerseyNumber = jerseyNumberRaw ? Number(jerseyNumberRaw) : null;
+
+  if (!verifyJoinCode(joinCode)) {
+    return { status: "error", message: "Der Mannschaftscode stimmt nicht." };
+  }
+
+  if (displayName.length < 2 || displayName.length > 80) {
+    return { status: "error", message: "Bitte einen gueltigen Namen eingeben." };
+  }
+
+  if (jerseyNumber !== null && (!Number.isInteger(jerseyNumber) || jerseyNumber < 1 || jerseyNumber > 99)) {
+    return { status: "error", message: "Die Rueckennummer muss zwischen 1 und 99 liegen." };
+  }
+
+  if (pin.length < 4) {
+    return { status: "error", message: "Die PIN muss mindestens 4 Zeichen haben." };
+  }
+
+  if (pin !== confirmPin) {
+    return { status: "error", message: "Die beiden PINs stimmen nicht ueberein." };
+  }
+
+  const state = await loadTeamState();
+  if (hasMemberWithName(state.members, displayName)) {
+    return { status: "error", message: "Dieser Spielername ist bereits registriert." };
+  }
+
+  const member: StoredTeamMember = {
+    id: randomUUID(),
+    team_id: state.team.id,
+    user_id: null,
+    display_name: displayName,
+    jersey_number: jerseyNumber,
+    role: "player",
+    active: true,
+    pin_hash: hashPin(pin)
+  };
+
+  state.members.push(member);
+  await saveTeamState(state);
+  revalidatePath("/login");
+  revalidatePath("/dashboard");
   await setSessionCookie(member);
   redirect("/dashboard");
 }
@@ -69,13 +140,21 @@ export async function logoutAction() {
 
 export async function createMemberAction(formData: FormData) {
   const { state } = await requireAdmin();
-  const displayName = String(formData.get("display_name") ?? "").trim();
+  const displayName = normalizeMemberName(formData.get("display_name"));
   const jerseyNumberRaw = String(formData.get("jersey_number") ?? "").trim();
   const accessPin = String(formData.get("access_pin") ?? "").trim();
   const role = String(formData.get("role") ?? "player") === "admin" ? "admin" : "player";
 
   if (!displayName) {
     throw new Error("Name fehlt.");
+  }
+
+  if (hasMemberWithName(state.members, displayName)) {
+    throw new Error("Dieser Spielername ist bereits vorhanden.");
+  }
+
+  if (jerseyNumberRaw && (!Number.isInteger(Number(jerseyNumberRaw)) || Number(jerseyNumberRaw) < 1 || Number(jerseyNumberRaw) > 99)) {
+    throw new Error("Die Rueckennummer muss zwischen 1 und 99 liegen.");
   }
 
   const member: StoredTeamMember = {
@@ -109,6 +188,61 @@ export async function setMemberPinAction(formData: FormData) {
   }
 
   member.pin_hash = hashPin(accessPin);
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function updateMemberRoleAction(formData: FormData) {
+  const { state, member: currentAdmin } = await requireAdmin();
+  const memberId = String(formData.get("member_id") ?? "");
+  const role = String(formData.get("role") ?? "player") === "admin" ? "admin" : "player";
+  const member = state.members.find((candidate) => candidate.id === memberId);
+
+  if (!member) {
+    throw new Error("Mitglied wurde nicht gefunden.");
+  }
+
+  if (member.id === currentAdmin.id && role !== "admin") {
+    throw new Error("Das aktuell verwendete Admin-Konto kann sich nicht selbst herabstufen.");
+  }
+
+  if (member.role === "admin" && role === "player" && activeAdminCount(state.members) <= 1) {
+    throw new Error("Der letzte Admin kann nicht zum Spieler gemacht werden.");
+  }
+
+  if (role === "player" && !member.pin_hash) {
+    throw new Error("Bitte zuerst eine Spieler-PIN fuer dieses Mitglied setzen.");
+  }
+
+  member.role = role;
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function deleteMemberAction(formData: FormData) {
+  const { state, member: currentAdmin } = await requireAdmin();
+  const memberId = String(formData.get("member_id") ?? "");
+  const confirmation = String(formData.get("confirm_delete") ?? "");
+  const memberIndex = state.members.findIndex((candidate) => candidate.id === memberId);
+  const member = state.members[memberIndex];
+
+  if (confirmation !== "delete-member") {
+    throw new Error("Das Loeschen wurde nicht bestaetigt.");
+  }
+
+  if (!member || memberIndex < 0) {
+    throw new Error("Mitglied wurde nicht gefunden.");
+  }
+
+  if (member.id === currentAdmin.id) {
+    throw new Error("Das aktuell verwendete Admin-Konto kann nicht geloescht werden.");
+  }
+
+  if (member.role === "admin" && activeAdminCount(state.members) <= 1) {
+    throw new Error("Der letzte Admin kann nicht geloescht werden.");
+  }
+
+  state.members.splice(memberIndex, 1);
   await saveTeamState(state);
   revalidateAll();
 }
@@ -380,6 +514,19 @@ function normalizeLedgerType(value: FormDataEntryValue | null): LedgerType {
   }
 
   return "fine";
+}
+
+function normalizeMemberName(value: FormDataEntryValue | null) {
+  return String(value ?? "").trim().replace(/\s+/g, " ");
+}
+
+function hasMemberWithName(members: StoredTeamMember[], displayName: string) {
+  const normalizedName = displayName.toLocaleLowerCase("de-DE");
+  return members.some((member) => member.display_name.toLocaleLowerCase("de-DE") === normalizedName);
+}
+
+function activeAdminCount(members: StoredTeamMember[]) {
+  return members.filter((member) => member.active && member.role === "admin").length;
 }
 
 function revalidateAll() {

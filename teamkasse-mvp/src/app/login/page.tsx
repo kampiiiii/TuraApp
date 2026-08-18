@@ -8,13 +8,17 @@ export default async function LoginPage() {
   const data = await getLoginData();
 
   return (
-    <div className="page-stack narrow">
+    <div className="page-stack login-page">
       <PageHeader
         eyebrow="Login"
         title="Mannschaft anmelden"
-        description="Admin und Spieler haben getrennte Zugaenge. Der Kassenwart vergibt die Spieler-PINs."
+        description="Admin und Spieler haben getrennte Zugaenge. Neue Spieler koennen ihren Zugang selbst anlegen."
       />
-      <LoginForm configured={data.configured} members={data.members} />
+      <LoginForm
+        configured={data.configured}
+        registrationConfigured={data.registrationConfigured}
+        members={data.members}
+      />
     </div>
   );
 }
