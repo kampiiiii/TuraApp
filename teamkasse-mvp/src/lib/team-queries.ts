@@ -31,10 +31,11 @@ export const getAppData = cache(async function getAppData(): Promise<AppData> {
 
   const isAdmin = currentMember.role === "admin";
   const visibleMembers = isAdmin ? state.members : state.members.filter((member) => member.id === currentMember.id);
-  const namedLedger = attachLedgerNames(state.ledger, state.members, state.catalog);
-  const visibleLedger = isAdmin ? namedLedger : namedLedger.filter((entry) => entry.member_id === currentMember.id);
-  const balances = calculateBalances(state);
-  const visibleBalances = isAdmin ? balances : balances.filter((balance) => balance.member_id === currentMember.id);
+  const visibleSourceLedger = isAdmin
+    ? state.ledger
+    : state.ledger.filter((entry) => entry.member_id === currentMember.id);
+  const visibleLedger = attachLedgerNames(visibleSourceLedger, state.members, state.catalog);
+  const visibleBalances = calculateBalances(state, isAdmin ? undefined : currentMember.id);
 
   return {
     isDemo: false,

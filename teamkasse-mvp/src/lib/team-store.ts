@@ -50,11 +50,11 @@ export function publicMembers(members: StoredTeamMember[]) {
   return members.map(({ pin_hash: _pinHash, ...member }) => member);
 }
 
-export function calculateBalances(state: TeamState): MemberBalance[] {
+export function calculateBalances(state: TeamState, memberId?: string): MemberBalance[] {
   const balances = new Map<string, MemberBalance>();
 
   for (const member of state.members) {
-    if (!member.active || member.role !== "player") {
+    if (!member.active || member.role !== "player" || (memberId && member.id !== memberId)) {
       continue;
     }
 
@@ -72,7 +72,7 @@ export function calculateBalances(state: TeamState): MemberBalance[] {
   }
 
   for (const entry of state.ledger) {
-    if (entry.status === "voided") {
+    if (entry.status === "voided" || (memberId && entry.member_id !== memberId)) {
       continue;
     }
 

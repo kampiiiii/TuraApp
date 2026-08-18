@@ -41,9 +41,9 @@ export function AppShell({ children, context }: { children: ReactNode; context: 
           {context.isDemo ? <span className="demo-chip">Login-Setup fehlt</span> : null}
           {!context.isDemo && context.authState === "member" ? (
             <form action={logoutAction}>
-              <button className="ghost-button full-width" type="submit">
+              <button className="ghost-button full-width" type="submit" aria-label="Abmelden" title="Abmelden">
                 <LogOut size={16} />
-                Abmelden
+                <span className="logout-label">Abmelden</span>
               </button>
             </form>
           ) : null}

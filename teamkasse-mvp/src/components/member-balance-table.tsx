@@ -9,7 +9,7 @@ export function MemberBalanceTable({ balances, team }: { balances: MemberBalance
         <span>{balances.length} aktive Spieler</span>
       </div>
       <div className="table-wrap">
-        <table>
+        <table className="responsive-table">
           <thead>
             <tr>
               <th>Spieler</th>
@@ -23,12 +23,14 @@ export function MemberBalanceTable({ balances, team }: { balances: MemberBalance
           <tbody>
             {balances.map((balance) => (
               <tr key={balance.member_id}>
-                <td>{balance.display_name}</td>
-                <td>{formatMoney(balance.fine_cents, team?.currency)}</td>
-                <td>{formatMoney(balance.drink_cents, team?.currency)}</td>
-                <td>{formatMoney(balance.payment_cents, team?.currency)}</td>
-                <td>{formatMoney(balance.open_charge_cents, team?.currency)}</td>
-                <td>
+                <td data-label="Spieler" data-wide="true">
+                  {balance.display_name}
+                </td>
+                <td data-label="Strafen">{formatMoney(balance.fine_cents, team?.currency)}</td>
+                <td data-label="Getraenke">{formatMoney(balance.drink_cents, team?.currency)}</td>
+                <td data-label="Bezahlt">{formatMoney(balance.payment_cents, team?.currency)}</td>
+                <td data-label="Offen">{formatMoney(balance.open_charge_cents, team?.currency)}</td>
+                <td data-label="Saldo">
                   <strong>{formatMoney(balance.balance_cents, team?.currency)}</strong>
                 </td>
               </tr>

@@ -32,7 +32,7 @@ export function LedgerTable({
         <span>{entries.length} Eintraege</span>
       </div>
       <div className="table-wrap">
-        <table>
+        <table className="responsive-table">
           <thead>
             <tr>
               <th>Datum</th>
@@ -48,10 +48,10 @@ export function LedgerTable({
           <tbody>
             {entries.map((entry) => (
               <tr key={entry.id}>
-                <td>{formatDate(entry.booking_date)}</td>
-                <td>{entry.member_name}</td>
-                <td>{labelForType(entry.type)}</td>
-                <td>
+                <td data-label="Datum">{formatDate(entry.booking_date)}</td>
+                <td data-label="Spieler">{entry.member_name}</td>
+                <td data-label="Art">{labelForType(entry.type)}</td>
+                <td data-label="Beschreibung" data-wide="true">
                   <span className="stacked-cell">
                     <strong>{entry.description}</strong>
                     {entry.notes ? <small>{entry.notes}</small> : null}
@@ -59,13 +59,13 @@ export function LedgerTable({
                     {entry.void_reason ? <small>Storno: {entry.void_reason}</small> : null}
                   </span>
                 </td>
-                <td>{entry.quantity}</td>
-                <td>{formatMoney(entry.total_amount_cents, team?.currency)}</td>
-                <td>
+                <td data-label="Menge">{entry.quantity}</td>
+                <td data-label="Betrag">{formatMoney(entry.total_amount_cents, team?.currency)}</td>
+                <td data-label="Status">
                   <StatusPill status={entry.status} />
                 </td>
                 {canVoid ? (
-                  <td>
+                  <td data-label="Aktion" data-wide="true">
                     <span className="ledger-actions">
                       {entry.status !== "voided" ? (
                         <form action={voidLedgerEntryAction} className="inline-action">
