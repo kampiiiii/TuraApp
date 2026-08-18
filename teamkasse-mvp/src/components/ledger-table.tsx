@@ -56,6 +56,7 @@ export function LedgerTable({
                     <strong>{entry.description}</strong>
                     {entry.notes ? <small>{entry.notes}</small> : null}
                     {entry.source === "player" ? <small className="booking-source">Vom Spieler selbst gebucht</small> : null}
+                    {entry.source === "system" ? <small className="booking-source">Automatisch gebucht</small> : null}
                     {entry.in_kind_label ? (
                       <small className={entry.in_kind_completed_at ? "in-kind-entry-state completed" : "in-kind-entry-state open"}>
                         Sachleistung: {entry.in_kind_label} ({entry.in_kind_completed_at ? "mitgebracht" : "offen"})
@@ -118,6 +119,8 @@ export function LedgerTable({
 function labelForType(type: LedgerEntry["type"]) {
   if (type === "fine") return "Strafe";
   if (type === "drink") return "Getraenk";
+  if (type === "fee") return "Beitrag";
+  if (type === "interest") return "Zinsen";
   if (type === "payment") return "Zahlung";
   return "Anpassung";
 }

@@ -344,7 +344,7 @@ select:disabled {
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
   gap: 14px;
 }
 
@@ -387,6 +387,7 @@ select:disabled {
 .quick-action,
 .admin-panel,
 .treasury-panel,
+.recurring-panel,
 .table-section,
 .catalog-column,
 .login-card,
@@ -614,13 +615,15 @@ tbody tr:hover {
 }
 
 .admin-panel,
-.treasury-panel {
+.treasury-panel,
+.recurring-panel {
   padding: 18px;
 }
 
 .form-grid,
 .booking-grid,
-.treasury-form {
+.treasury-form,
+.recurring-form {
   display: grid;
   gap: 12px;
 }
@@ -635,6 +638,95 @@ tbody tr:hover {
 
 .treasury-form {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.recurring-form {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.recurring-members {
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.recurring-members legend {
+  padding: 0 5px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.checkbox-row input {
+  flex: 0 0 auto;
+  width: 18px;
+  min-height: 18px;
+}
+
+.recurring-all {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.recurring-member-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 9px 14px;
+  margin-top: 10px;
+}
+
+.recurring-list {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.recurring-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+}
+
+.recurring-row:first-of-type {
+  border-top: 0;
+}
+
+.recurring-row-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.recurring-row-main {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.recurring-row-main small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.recurring-amount {
+  white-space: nowrap;
 }
 
 .cash-amount.income {
@@ -1256,7 +1348,8 @@ select:focus {
   }
 
   .form-grid,
-  .catalog-form {
+  .catalog-form,
+  .recurring-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1310,7 +1403,7 @@ select:focus {
     bottom: 0;
     left: 0;
     z-index: 40;
-    grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
     gap: 2px;
     padding: 6px 8px max(6px, env(safe-area-inset-bottom));
     border-top: 1px solid rgba(255, 255, 255, 0.12);
@@ -1324,7 +1417,7 @@ select:focus {
     gap: 3px;
     min-height: 56px;
     padding: 4px;
-    font-size: 0.72rem;
+    font-size: 0.65rem;
   }
 
   .nav-link svg {
@@ -1403,6 +1496,7 @@ select:focus {
   .form-grid,
   .booking-grid,
   .treasury-form,
+  .recurring-form,
   .catalog-columns,
   .catalog-groups,
   .login-grid,
@@ -1433,6 +1527,7 @@ select:focus {
   .quick-action,
   .admin-panel,
   .treasury-panel,
+  .recurring-panel,
   .catalog-column,
   .login-card,
   .profile-panel,
@@ -1513,6 +1608,22 @@ select:focus {
   .ledger-actions {
     justify-content: flex-end;
     width: 100%;
+  }
+
+  .recurring-row {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .recurring-amount,
+  .recurring-row > .status-pill {
+    grid-column: 2;
+  }
+
+  .recurring-row > .ledger-actions {
+    grid-row: 1 / span 3;
+    grid-column: 3;
+    width: auto;
   }
 
   .span-2 {

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Banknote, Beer, CircleDollarSign, ClipboardList, WalletCards } from "lucide-react";
+import { Banknote, Beer, CalendarClock, CircleDollarSign, ClipboardList, WalletCards } from "lucide-react";
 import { formatMoney } from "@/lib/money";
 import type { MemberBalance, Team } from "@/lib/types";
 
@@ -15,6 +15,7 @@ export function BalanceCards({
   const shownBalances = currentMemberId ? balances.filter((balance) => balance.member_id === currentMemberId) : balances;
   const totalFine = sum(shownBalances, "fine_cents");
   const totalDrinks = sum(shownBalances, "drink_cents");
+  const totalFees = sum(shownBalances, "fee_cents") + sum(shownBalances, "interest_cents");
   const totalPayments = sum(shownBalances, "payment_cents");
   const totalDue = sum(shownBalances, "amount_due_cents");
   const totalCredit = sum(shownBalances, "credit_cents");
@@ -24,6 +25,7 @@ export function BalanceCards({
     <section className="metric-grid" aria-label="Salden">
       <Metric label="Strafen" value={formatMoney(totalFine, currency)} icon={<ClipboardList size={20} />} />
       <Metric label="Getraenke" value={formatMoney(totalDrinks, currency)} icon={<Beer size={20} />} />
+      <Metric label="Beitraege" value={formatMoney(totalFees, currency)} icon={<CalendarClock size={20} />} />
       <Metric label="Bezahlt" value={formatMoney(totalPayments, currency)} icon={<Banknote size={20} />} />
       <Metric label="Offen" value={formatMoney(totalDue, currency)} icon={<CircleDollarSign size={20} />} strong={totalDue > 0} />
       <Metric label="Guthaben" value={formatMoney(totalCredit, currency)} icon={<WalletCards size={20} />} strong={totalCredit > 0} />

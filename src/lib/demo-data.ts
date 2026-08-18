@@ -17,7 +17,8 @@ const members: TeamMember[] = [
     display_name: "Dustyn Kassenwart",
     jersey_number: 1,
     role: "admin",
-    active: true
+    active: true,
+    joined_at: "2026-01-01T00:00:00.000Z"
   },
   {
     id: "demo-timo",
@@ -26,7 +27,8 @@ const members: TeamMember[] = [
     display_name: "Timo Stuermer",
     jersey_number: 9,
     role: "player",
-    active: true
+    active: true,
+    joined_at: "2026-01-01T00:00:00.000Z"
   },
   {
     id: "demo-leon",
@@ -35,7 +37,8 @@ const members: TeamMember[] = [
     display_name: "Leon Abwehr",
     jersey_number: 4,
     role: "player",
-    active: true
+    active: true,
+    joined_at: "2026-01-01T00:00:00.000Z"
   }
 ];
 
@@ -107,6 +110,10 @@ const ledger: LedgerEntry[] = [
     created_by_member_id: "demo-admin",
     created_by_name: "Dustyn Kassenwart",
     correction_of: null,
+    recurring_plan_id: null,
+    recurring_period: null,
+    interest_for_entry_id: null,
+    interest_period: null,
     void_reason: null,
     created_at: "2026-08-12T18:10:00Z"
   },
@@ -134,6 +141,10 @@ const ledger: LedgerEntry[] = [
     created_by_member_id: "demo-admin",
     created_by_name: "Dustyn Kassenwart",
     correction_of: null,
+    recurring_plan_id: null,
+    recurring_period: null,
+    interest_for_entry_id: null,
+    interest_period: null,
     void_reason: null,
     created_at: "2026-08-14T21:00:00Z"
   },
@@ -161,6 +172,10 @@ const ledger: LedgerEntry[] = [
     created_by_member_id: "demo-admin",
     created_by_name: "Dustyn Kassenwart",
     correction_of: null,
+    recurring_plan_id: null,
+    recurring_period: null,
+    interest_for_entry_id: null,
+    interest_period: null,
     void_reason: null,
     created_at: "2026-08-15T19:00:00Z"
   }
@@ -180,6 +195,8 @@ const balances: MemberBalance[] = members
       fine_cents: sum((entry) => entry.type === "fine"),
       drink_cents: sum((entry) => entry.type === "drink"),
       adjustment_cents: sum((entry) => entry.type === "adjustment"),
+      fee_cents: sum((entry) => entry.type === "fee"),
+      interest_cents: sum((entry) => entry.type === "interest"),
       payment_cents: -sum((entry) => entry.type === "payment"),
       open_charge_cents: entries
         .filter((entry) => entry.type !== "payment" && entry.total_amount_cents > 0)
@@ -209,5 +226,6 @@ export const demoData: AppData = {
       balance_set_at: null
     },
     entries: []
-  }
+  },
+  recurring_plans: []
 };

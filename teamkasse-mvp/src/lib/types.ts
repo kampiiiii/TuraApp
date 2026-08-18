@@ -1,8 +1,8 @@
 export type AppRole = "admin" | "player";
 export type CatalogType = "fine" | "drink";
-export type LedgerType = "fine" | "drink" | "payment" | "adjustment";
+export type LedgerType = "fine" | "drink" | "fee" | "interest" | "payment" | "adjustment";
 export type LedgerStatus = "open" | "partial" | "paid" | "voided";
-export type BookingSource = "admin" | "player";
+export type BookingSource = "admin" | "player" | "system";
 export type AuthState = "setup-required" | "anonymous" | "member" | "no-team";
 export type TreasuryEntryType = "balance" | "income" | "expense";
 export type TreasuryEntryStatus = "active" | "voided";
@@ -24,6 +24,7 @@ export type TeamMember = {
   jersey_number: number | null;
   role: AppRole;
   active: boolean;
+  joined_at: string;
 };
 
 export type StoredTeamMember = TeamMember & {
@@ -65,6 +66,10 @@ export type LedgerEntry = {
   created_by_member_id: string | null;
   created_by_name: string | null;
   correction_of: string | null;
+  recurring_plan_id: string | null;
+  recurring_period: string | null;
+  interest_for_entry_id: string | null;
+  interest_period: string | null;
   void_reason: string | null;
   created_at: string;
 };
@@ -76,6 +81,8 @@ export type MemberBalance = {
   fine_cents: number;
   drink_cents: number;
   adjustment_cents: number;
+  fee_cents: number;
+  interest_cents: number;
   payment_cents: number;
   open_charge_cents: number;
   amount_due_cents: number;
@@ -126,6 +133,24 @@ export type TreasuryData = {
   entries: TreasuryBookEntry[];
 };
 
+export type RecurringPlan = {
+  id: string;
+  team_id: string;
+  name: string;
+  ledger_type: "fee" | "drink";
+  amount_cents: number;
+  due_day: number;
+  start_month: string;
+  applies_to_all: boolean;
+  member_ids: string[];
+  annual_interest_rate_bps: number;
+  grace_days: number;
+  active: boolean;
+  created_by_member_id: string | null;
+  created_by_name: string | null;
+  created_at: string;
+};
+
 export type AppData = {
   isDemo: boolean;
   authState: AuthState;
@@ -136,6 +161,7 @@ export type AppData = {
   ledger: LedgerEntry[];
   balances: MemberBalance[];
   treasury: TreasuryData;
+  recurring_plans: RecurringPlan[];
 };
 
 export type TeamState = {
@@ -145,4 +171,6 @@ export type TeamState = {
   catalog: CatalogItem[];
   ledger: LedgerEntry[];
   treasury_entries: TreasuryEntry[];
+  recurring_plans: RecurringPlan[];
+  suppressed_recurring_entries: string[];
 };

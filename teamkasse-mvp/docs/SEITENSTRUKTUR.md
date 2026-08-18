@@ -2,6 +2,8 @@
 
 - `/dashboard`: Startseite mit Salden, offenen Betraegen, Sachleistungen und Kurzlisten.
 - `/admin`: Arbeitsbereich fuer Kassenwart: Spieler, sortierbarer Katalog und Buchungen.
+- `/kasse`: Kassenbestand, Einnahmen und Ausgaben der Mannschaftskasse.
+- `/beitraege`: Monatsbeitraege, Getraenkeflats und optionale Verzugszinsen verwalten.
 - `/buchungen`: Historie der sichtbaren Buchungen.
 - `/katalog`: Strafenkatalog und Getraenkekatalog.
 - `/login`: Anmeldung als Kassenwart mit Admin-Passwort oder als Spieler mit PIN.
@@ -15,8 +17,9 @@
 3. Katalogposition anlegen oder vorhandene Position nutzen.
 4. Spieler waehlen und Strafe, Getraenk, Zahlung oder Anpassung buchen.
 5. Eine Zahlung wird automatisch auf die aeltesten offenen Buchungen des Spielers angerechnet.
-6. Mitgebrachte Sachleistungen abhaken.
-7. Falsche Eintraege stornieren oder bei Bedarf dauerhaft loeschen.
+6. Bei Bedarf eine Monatsregel fuer alle oder ausgewaehlte Spieler anlegen.
+7. Mitgebrachte Sachleistungen abhaken.
+8. Falsche Eintraege stornieren oder bei Bedarf dauerhaft loeschen.
 
 ## MVP-Workflow Spieler
 

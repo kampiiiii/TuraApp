@@ -47,7 +47,8 @@ export const getAppData = cache(async function getAppData(): Promise<AppData> {
     catalog: state.catalog,
     ledger: visibleLedger.sort((left, right) => right.created_at.localeCompare(left.created_at)).slice(0, 100),
     balances: visibleBalances,
-    treasury: isAdmin ? calculateTreasury(state) : emptyTreasury()
+    treasury: isAdmin ? calculateTreasury(state) : emptyTreasury(),
+    recurring_plans: isAdmin ? state.recurring_plans : []
   };
 });
 
@@ -83,7 +84,8 @@ function emptyData(authState: AuthState, team: AppData["team"]): AppData {
     catalog: [],
     ledger: [],
     balances: [],
-    treasury: emptyTreasury()
+    treasury: emptyTreasury(),
+    recurring_plans: []
   };
 }
 

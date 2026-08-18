@@ -6,6 +6,7 @@
 - pflegt Strafenkatalog und Getraenkekatalog und kann Positionen daraus loeschen
 - sortiert Katalogpositionen und verschiebt sie nach oben oder unten
 - bucht Strafen, Getraenke, Zahlungen und Anpassungen
+- verwaltet automatische Monatsbeitraege, Getraenkeflats und optionale Zinssaetze
 - hakt mitgebrachte Sachleistungen ab oder oeffnet sie wieder
 - aendert Mitgliederrollen zwischen Spieler und Admin
 - loescht Spielerzugaenge, ohne deren Finanzhistorie zu entfernen
@@ -21,6 +22,7 @@
 - sieht eigene offene und erledigte Sachleistungen
 - aendert die eigene PIN nach Pruefung der bisherigen PIN
 - kann keine Buchungen veraendern
+- kann keine Monatsregeln oder Zinssaetze veraendern
 - kann keine anderen Spieler sehen
 
 ## Serverseitige Grenze im MVP

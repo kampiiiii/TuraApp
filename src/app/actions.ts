@@ -14,7 +14,7 @@ import {
   verifyPin
 } from "@/lib/auth";
 import { parseEuroToCents, parseQuantity } from "@/lib/money";
-import { attachLedgerNames, loadTeamState, saveTeamState } from "@/lib/team-store";
+import { attachLedgerNames, loadTeamState, recurringSuppressionKey, saveTeamState } from "@/lib/team-store";
 import type { CatalogItem, CatalogType, LedgerType, StoredTeamMember, TreasuryEntryType } from "@/lib/types";
 
 export type PinChangeState = {
@@ -138,6 +138,7 @@ export async function registerPlayerAction(
     jersey_number: jerseyNumber,
     role: "player",
     active: true,
+    joined_at: new Date().toISOString(),
     pin_hash: hashPin(pin)
   };
 
@@ -181,6 +182,7 @@ export async function createMemberAction(formData: FormData) {
     jersey_number: jerseyNumberRaw ? Number(jerseyNumberRaw) : null,
     role,
     active: true,
+    joined_at: new Date().toISOString(),
     pin_hash: accessPin ? hashPin(accessPin) : null
   };
 
@@ -407,6 +409,100 @@ export async function sortCatalogItemsAction(formData: FormData) {
   revalidateAll();
 }
 
+export async function createRecurringPlanAction(formData: FormData) {
+  const { state, member: admin } = await requireAdmin();
+  const name = String(formData.get("name") ?? "").trim();
+  const ledgerType = String(formData.get("ledger_type") ?? "fee") === "drink" ? "drink" : "fee";
+  const amountCents = Math.abs(parseEuroToCents(formData.get("amount")));
+  const dueDay = Number(formData.get("due_day") ?? 1);
+  const startMonth = String(formData.get("start_month") ?? "").trim();
+  const appliesToAll = formData.get("applies_to_all") === "on";
+  const requestedMemberIds = formData.getAll("member_ids").map(String);
+  const validPlayerIds = new Set(
+    state.members.filter((member) => member.active && member.role === "player").map((member) => member.id)
+  );
+  const memberIds = requestedMemberIds.filter((memberId) => validPlayerIds.has(memberId));
+  const annualInterestRateBps = parsePercentToBasisPoints(formData.get("annual_interest_rate"));
+
+  if (!name) {
+    throw new Error("Name fuer die monatliche Buchung fehlt.");
+  }
+
+  if (amountCents <= 0) {
+    throw new Error("Der Monatsbetrag muss groesser als 0 sein.");
+  }
+
+  if (!Number.isInteger(dueDay) || dueDay < 1 || dueDay > 28) {
+    throw new Error("Der Buchungstag muss zwischen 1 und 28 liegen.");
+  }
+
+  if (!isValidMonth(startMonth)) {
+    throw new Error("Bitte einen gueltigen Startmonat auswaehlen.");
+  }
+
+  if (!appliesToAll && memberIds.length === 0) {
+    throw new Error("Bitte mindestens einen Spieler auswaehlen oder alle Spieler aktivieren.");
+  }
+
+  if (annualInterestRateBps < 0 || annualInterestRateBps > 5_000) {
+    throw new Error("Der Zinssatz muss zwischen 0 und 50 Prozent pro Jahr liegen.");
+  }
+
+  state.recurring_plans.push({
+    id: randomUUID(),
+    team_id: state.team.id,
+    name,
+    ledger_type: ledgerType,
+    amount_cents: amountCents,
+    due_day: dueDay,
+    start_month: startMonth,
+    applies_to_all: appliesToAll,
+    member_ids: appliesToAll ? [] : memberIds,
+    annual_interest_rate_bps: annualInterestRateBps,
+    grace_days: 30,
+    active: true,
+    created_by_member_id: admin.id,
+    created_by_name: admin.display_name,
+    created_at: new Date().toISOString()
+  });
+
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function toggleRecurringPlanAction(formData: FormData) {
+  const { state } = await requireAdmin();
+  const planId = String(formData.get("plan_id") ?? "");
+  const plan = state.recurring_plans.find((candidate) => candidate.id === planId);
+
+  if (!plan) {
+    throw new Error("Monatliche Regel wurde nicht gefunden.");
+  }
+
+  plan.active = !plan.active;
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function deleteRecurringPlanAction(formData: FormData) {
+  const { state } = await requireAdmin();
+  const planId = String(formData.get("plan_id") ?? "");
+  const confirmation = String(formData.get("confirm_delete") ?? "");
+
+  if (confirmation !== "delete-recurring-plan") {
+    throw new Error("Das Loeschen wurde nicht bestaetigt.");
+  }
+
+  const planIndex = state.recurring_plans.findIndex((plan) => plan.id === planId);
+  if (planIndex < 0) {
+    throw new Error("Monatliche Regel wurde nicht gefunden.");
+  }
+
+  state.recurring_plans.splice(planIndex, 1);
+  await saveTeamState(state);
+  revalidateAll();
+}
+
 export async function createSelfDrinkAction(
   _previousState: SelfDrinkState,
   formData: FormData
@@ -455,6 +551,10 @@ export async function createSelfDrinkAction(
     created_by_member_id: member.id,
     created_by_name: member.display_name,
     correction_of: null,
+    recurring_plan_id: null,
+    recurring_period: null,
+    interest_for_entry_id: null,
+    interest_period: null,
     void_reason: null,
     created_at: new Date().toISOString()
   });
@@ -540,6 +640,10 @@ export async function createLedgerEntryAction(formData: FormData) {
     created_by_member_id: admin.id,
     created_by_name: admin.display_name,
     correction_of: null,
+    recurring_plan_id: null,
+    recurring_period: null,
+    interest_for_entry_id: null,
+    interest_period: null,
     void_reason: null,
     created_at: new Date().toISOString()
   });
@@ -647,6 +751,12 @@ export async function deleteLedgerEntryAction(formData: FormData) {
     throw new Error("Buchung fehlt.");
   }
 
+  const entry = state.ledger[entryIndex];
+  const suppressionKey = recurringSuppressionKey(entry);
+  if (suppressionKey && !state.suppressed_recurring_entries.includes(suppressionKey)) {
+    state.suppressed_recurring_entries.push(suppressionKey);
+  }
+
   state.ledger.splice(entryIndex, 1);
   await saveTeamState(state);
   revalidateAll();
@@ -728,6 +838,28 @@ function normalizeTreasuryEntryType(value: FormDataEntryValue | null): TreasuryE
   return "expense";
 }
 
+function parsePercentToBasisPoints(value: FormDataEntryValue | null) {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    return 0;
+  }
+
+  const parsed = Number(raw.replace(",", "."));
+  if (!Number.isFinite(parsed)) {
+    throw new Error("Zinssatz konnte nicht gelesen werden.");
+  }
+
+  return Math.round(parsed * 100);
+}
+
+function isValidMonth(month: string) {
+  const match = /^(\d{4})-(\d{2})$/.exec(month);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const monthNumber = Number(match[2]);
+  return year >= 2000 && monthNumber >= 1 && monthNumber <= 12;
+}
+
 function normalizeMemberName(value: FormDataEntryValue | null) {
   return String(value ?? "").trim().replace(/\s+/g, " ");
 }
@@ -748,6 +880,7 @@ function revalidateAll() {
   revalidatePath("/katalog");
   revalidatePath("/profil");
   revalidatePath("/kasse");
+  revalidatePath("/beitraege");
   revalidatePath("/login");
   refresh();
 }
