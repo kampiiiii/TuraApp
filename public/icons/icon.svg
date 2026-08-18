@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="TURA App">
+  <rect width="512" height="512" rx="88" fill="#0b0b0d"/>
+  <path d="M92 96h328v88H92z" fill="#c1121f"/>
+  <path d="M126 116h260v48H126z" fill="#ffffff" opacity=".12"/>
+  <path d="M130 232h252v46H279v154h-50V278h-99z" fill="#ffffff"/>
+  <circle cx="356" cy="364" r="62" fill="#c1121f"/>
+  <path d="M330 364h52M356 338v52" stroke="#ffffff" stroke-width="22" stroke-linecap="round"/>
+</svg>

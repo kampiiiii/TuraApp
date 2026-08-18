@@ -1,0 +1,4 @@
+NEXTJS_ENV=development
+TEAMKASSE_ADMIN_PASSWORD=bitte-aendern
+TEAMKASSE_SESSION_SECRET=langes-zufaelliges-geheimnis
+TEAMKASSE_JOIN_CODE=mannschaftscode-aendern
