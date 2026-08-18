@@ -34,6 +34,7 @@ export type CatalogItem = {
   type: CatalogType;
   name: string;
   description: string | null;
+  in_kind_label: string | null;
   amount_cents: number;
   active: boolean;
 };
@@ -53,6 +54,10 @@ export type LedgerEntry = {
   status: LedgerStatus;
   booking_date: string;
   notes: string | null;
+  in_kind_label: string | null;
+  in_kind_completed_at: string | null;
+  in_kind_completed_by_member_id: string | null;
+  in_kind_completed_by_name: string | null;
   source: BookingSource;
   created_by_member_id: string | null;
   created_by_name: string | null;

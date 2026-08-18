@@ -14,7 +14,7 @@ const members: TeamMember[] = [
     id: "demo-admin",
     team_id: team.id,
     user_id: "demo-user",
-    display_name: "Max Kassenwart",
+    display_name: "Dustyn Kassenwart",
     jersey_number: 1,
     role: "admin",
     active: true
@@ -46,6 +46,7 @@ const catalog: CatalogItem[] = [
     type: "fine",
     name: "Zu spaet zum Training",
     description: "Bis 15 Minuten",
+    in_kind_label: null,
     amount_cents: 500,
     active: true
   },
@@ -55,6 +56,7 @@ const catalog: CatalogItem[] = [
     type: "fine",
     name: "Material vergessen",
     description: "Schuhe, Schienbeinschoner oder Leibchen",
+    in_kind_label: "1 Kiste Bier",
     amount_cents: 300,
     active: true
   },
@@ -64,6 +66,7 @@ const catalog: CatalogItem[] = [
     type: "drink",
     name: "Bier",
     description: "Flasche",
+    in_kind_label: null,
     amount_cents: 250,
     active: true
   },
@@ -73,6 +76,7 @@ const catalog: CatalogItem[] = [
     type: "drink",
     name: "Wasser",
     description: "Flasche",
+    in_kind_label: null,
     amount_cents: 120,
     active: true
   }
@@ -94,9 +98,13 @@ const ledger: LedgerEntry[] = [
     status: "open",
     booking_date: "2026-08-12",
     notes: "Training Mittwoch",
+    in_kind_label: null,
+    in_kind_completed_at: null,
+    in_kind_completed_by_member_id: null,
+    in_kind_completed_by_name: null,
     source: "admin",
     created_by_member_id: "demo-admin",
-    created_by_name: "Max Kassenwart",
+    created_by_name: "Dustyn Kassenwart",
     correction_of: null,
     void_reason: null,
     created_at: "2026-08-12T18:10:00Z"
@@ -116,9 +124,13 @@ const ledger: LedgerEntry[] = [
     status: "open",
     booking_date: "2026-08-14",
     notes: null,
+    in_kind_label: null,
+    in_kind_completed_at: null,
+    in_kind_completed_by_member_id: null,
+    in_kind_completed_by_name: null,
     source: "admin",
     created_by_member_id: "demo-admin",
-    created_by_name: "Max Kassenwart",
+    created_by_name: "Dustyn Kassenwart",
     correction_of: null,
     void_reason: null,
     created_at: "2026-08-14T21:00:00Z"
@@ -138,9 +150,13 @@ const ledger: LedgerEntry[] = [
     status: "paid",
     booking_date: "2026-08-15",
     notes: "Bar",
+    in_kind_label: null,
+    in_kind_completed_at: null,
+    in_kind_completed_by_member_id: null,
+    in_kind_completed_by_name: null,
     source: "admin",
     created_by_member_id: "demo-admin",
-    created_by_name: "Max Kassenwart",
+    created_by_name: "Dustyn Kassenwart",
     correction_of: null,
     void_reason: null,
     created_at: "2026-08-15T19:00:00Z"

@@ -3,6 +3,7 @@ import { ArrowRight, ReceiptText } from "lucide-react";
 import { BalanceCards } from "@/components/balance-cards";
 import { LoginRequired, NoTeamState } from "@/components/empty-state";
 import { LedgerTable } from "@/components/ledger-table";
+import { InKindObligationList } from "@/components/in-kind-obligation-list";
 import { MemberBalanceTable } from "@/components/member-balance-table";
 import { PageHeader } from "@/components/page-header";
 import { SelfDrinkForm } from "@/components/self-drink-form";
@@ -57,6 +58,8 @@ export default async function DashboardPage() {
       {!isAdmin ? <SelfDrinkForm catalog={data.catalog} team={data.team} /> : null}
 
       {isAdmin ? <MemberBalanceTable balances={data.balances} team={data.team} /> : null}
+
+      <InKindObligationList entries={data.ledger} canManage={isAdmin} disabled={data.isDemo} />
 
       <section className="split-section">
         <div>

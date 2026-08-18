@@ -149,22 +149,29 @@ function normalizeState(state: TeamState): TeamState {
     },
     members: state.members.map((member) => ({
       ...member,
+      display_name: member.display_name === "Max Kassenwart" ? "Dustyn Kassenwart" : member.display_name,
       user_id: member.user_id ?? null,
       pin_hash: member.pin_hash ?? null,
       active: member.active !== false
     })),
     catalog: state.catalog.map((item) => ({
       ...item,
+      in_kind_label: item.in_kind_label ?? null,
       active: item.active !== false
     })),
     ledger: state.ledger.map((entry) => ({
       ...entry,
-      member_name: entry.member_name ?? "Unbekannt",
+      member_name: entry.member_name === "Max Kassenwart" ? "Dustyn Kassenwart" : entry.member_name ?? "Unbekannt",
       catalog_item_name: entry.catalog_item_name ?? null,
       notes: entry.notes ?? null,
+      in_kind_label: entry.in_kind_label ?? null,
+      in_kind_completed_at: entry.in_kind_completed_at ?? null,
+      in_kind_completed_by_member_id: entry.in_kind_completed_by_member_id ?? null,
+      in_kind_completed_by_name: entry.in_kind_completed_by_name ?? null,
       source: entry.source === "player" ? "player" : "admin",
       created_by_member_id: entry.created_by_member_id ?? null,
-      created_by_name: entry.created_by_name ?? null,
+      created_by_name:
+        entry.created_by_name === "Max Kassenwart" ? "Dustyn Kassenwart" : entry.created_by_name ?? null,
       correction_of: entry.correction_of ?? null,
       void_reason: entry.void_reason ?? null
     }))

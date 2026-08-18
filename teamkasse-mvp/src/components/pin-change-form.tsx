@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { KeyRound } from "lucide-react";
+import { useActionState, useEffect, useRef } from "react";
+import { CheckCircle2, KeyRound } from "lucide-react";
 import { changeOwnPinAction, type PinChangeState } from "@/app/actions";
 
 const initialState: PinChangeState = {
@@ -11,6 +11,13 @@ const initialState: PinChangeState = {
 
 export function PinChangeForm() {
   const [state, formAction, pending] = useActionState(changeOwnPinAction, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (state.status === "success") {
+      formRef.current?.reset();
+    }
+  }, [state.status]);
 
   return (
     <section className="profile-panel">
@@ -24,7 +31,7 @@ export function PinChangeForm() {
         </span>
       </div>
 
-      <form action={formAction} className="pin-change-form">
+      <form ref={formRef} action={formAction} className="pin-change-form">
         <label>
           Bisherige PIN
           <input name="current_pin" type="password" inputMode="numeric" autoComplete="current-password" required />
@@ -38,8 +45,18 @@ export function PinChangeForm() {
           <input name="confirm_pin" type="password" inputMode="numeric" autoComplete="new-password" minLength={4} required />
         </label>
 
-        {state.message ? (
-          <p className={`form-message ${state.status}`} role={state.status === "error" ? "alert" : "status"}>
+        {state.status === "success" ? (
+          <div className="pin-success-message" role="status">
+            <CheckCircle2 size={22} aria-hidden="true" />
+            <span>
+              <strong>PIN erfolgreich geaendert</strong>
+              <small>{state.message} Die Eingabefelder wurden geleert.</small>
+            </span>
+          </div>
+        ) : null}
+
+        {state.status === "error" ? (
+          <p className="form-message error" role="alert">
             {state.message}
           </p>
         ) : null}

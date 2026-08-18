@@ -15,7 +15,7 @@ import {
 } from "@/lib/auth";
 import { parseEuroToCents, parseQuantity } from "@/lib/money";
 import { attachLedgerNames, loadTeamState, saveTeamState } from "@/lib/team-store";
-import type { CatalogType, LedgerType, StoredTeamMember } from "@/lib/types";
+import type { CatalogItem, CatalogType, LedgerType, StoredTeamMember } from "@/lib/types";
 
 export type PinChangeState = {
   status: "idle" | "success" | "error";
@@ -275,7 +275,6 @@ export async function changeOwnPinAction(
   member.pin_hash = hashPin(newPin);
   await saveTeamState(state);
   revalidatePath("/profil");
-  refresh();
 
   return { status: "success", message: "Deine PIN wurde geaendert." };
 }
@@ -285,6 +284,7 @@ export async function createCatalogItemAction(formData: FormData) {
   const type = normalizeCatalogType(formData.get("type"));
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim() || null;
+  const inKindLabel = String(formData.get("in_kind_label") ?? "").trim() || null;
   const amountCents = parseEuroToCents(formData.get("amount"));
 
   if (!name) {
@@ -297,8 +297,63 @@ export async function createCatalogItemAction(formData: FormData) {
     type,
     name,
     description,
+    in_kind_label: inKindLabel,
     amount_cents: amountCents,
     active: true
+  });
+
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function moveCatalogItemAction(formData: FormData) {
+  const { state } = await requireAdmin();
+  const itemId = String(formData.get("item_id") ?? "");
+  const direction = String(formData.get("direction") ?? "up") === "down" ? "down" : "up";
+  const item = state.catalog.find((candidate) => candidate.id === itemId);
+
+  if (!item) {
+    throw new Error("Katalogeintrag wurde nicht gefunden.");
+  }
+
+  const typeIndexes = state.catalog
+    .map((candidate, index) => (candidate.type === item.type ? index : -1))
+    .filter((index) => index >= 0);
+  const currentCatalogIndex = state.catalog.findIndex((candidate) => candidate.id === itemId);
+  const currentTypeIndex = typeIndexes.indexOf(currentCatalogIndex);
+  const targetTypeIndex = direction === "down" ? currentTypeIndex + 1 : currentTypeIndex - 1;
+
+  if (targetTypeIndex < 0 || targetTypeIndex >= typeIndexes.length) {
+    return;
+  }
+
+  const targetCatalogIndex = typeIndexes[targetTypeIndex];
+  [state.catalog[currentCatalogIndex], state.catalog[targetCatalogIndex]] = [
+    state.catalog[targetCatalogIndex],
+    state.catalog[currentCatalogIndex]
+  ];
+
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function sortCatalogItemsAction(formData: FormData) {
+  const { state } = await requireAdmin();
+  const type = normalizeCatalogType(formData.get("type"));
+  const sortBy = String(formData.get("sort_by") ?? "name") === "amount" ? "amount" : "name";
+  const typeIndexes = state.catalog
+    .map((item, index) => (item.type === type ? index : -1))
+    .filter((index) => index >= 0);
+  const sortedItems = typeIndexes.map((index) => state.catalog[index]).sort((left, right) => {
+    if (sortBy === "amount") {
+      return left.amount_cents - right.amount_cents || left.name.localeCompare(right.name, "de");
+    }
+
+    return left.name.localeCompare(right.name, "de", { sensitivity: "base" });
+  });
+
+  typeIndexes.forEach((catalogIndex, sortedIndex) => {
+    state.catalog[catalogIndex] = sortedItems[sortedIndex];
   });
 
   await saveTeamState(state);
@@ -344,6 +399,10 @@ export async function createSelfDrinkAction(
     status: "open",
     booking_date: new Date().toISOString().slice(0, 10),
     notes: null,
+    in_kind_label: null,
+    in_kind_completed_at: null,
+    in_kind_completed_by_member_id: null,
+    in_kind_completed_by_name: null,
     source: "player",
     created_by_member_id: member.id,
     created_by_name: member.display_name,
@@ -378,23 +437,25 @@ export async function createLedgerEntryAction(formData: FormData) {
 
   let unitAmountCents = parseEuroToCents(formData.get("amount"));
   let description = manualDescription;
+  let selectedCatalogItem: CatalogItem | null = null;
 
   if (catalogItemId && type !== "payment" && type !== "adjustment") {
-    const item = state.catalog.find((candidate) => candidate.id === catalogItemId && candidate.team_id === state.team.id);
+    selectedCatalogItem =
+      state.catalog.find((candidate) => candidate.id === catalogItemId && candidate.team_id === state.team.id) ?? null;
 
-    if (!item) {
+    if (!selectedCatalogItem) {
       throw new Error("Katalogeintrag wurde nicht gefunden.");
     }
 
-    unitAmountCents = item.amount_cents;
-    description = item.name;
+    unitAmountCents = selectedCatalogItem.amount_cents;
+    description = selectedCatalogItem.name;
   }
 
   if (!description) {
     description = type === "payment" ? "Zahlung erhalten" : "Manuelle Buchung";
   }
 
-  if (unitAmountCents === 0) {
+  if (unitAmountCents === 0 && !selectedCatalogItem?.in_kind_label) {
     throw new Error("Betrag fehlt.");
   }
 
@@ -413,7 +474,7 @@ export async function createLedgerEntryAction(formData: FormData) {
     member_id: memberId,
     member_name: bookedMember.display_name,
     catalog_item_id: catalogItemId,
-    catalog_item_name: catalogItemId ? state.catalog.find((item) => item.id === catalogItemId)?.name ?? null : null,
+    catalog_item_name: selectedCatalogItem?.name ?? null,
     type,
     description,
     quantity,
@@ -422,6 +483,10 @@ export async function createLedgerEntryAction(formData: FormData) {
     status,
     booking_date: bookingDate,
     notes,
+    in_kind_label: selectedCatalogItem?.in_kind_label ?? null,
+    in_kind_completed_at: null,
+    in_kind_completed_by_member_id: null,
+    in_kind_completed_by_name: null,
     source: "admin",
     created_by_member_id: admin.id,
     created_by_name: admin.display_name,
@@ -465,6 +530,27 @@ export async function deleteLedgerEntryAction(formData: FormData) {
   }
 
   state.ledger.splice(entryIndex, 1);
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function setInKindCompletionAction(formData: FormData) {
+  const { state, member: admin } = await requireAdmin();
+  const entryId = String(formData.get("entry_id") ?? "");
+  const completed = String(formData.get("completed") ?? "false") === "true";
+  const entry = state.ledger.find((candidate) => candidate.id === entryId);
+
+  if (!entry?.in_kind_label) {
+    throw new Error("Sachleistung wurde nicht gefunden.");
+  }
+
+  if (entry.status === "voided") {
+    throw new Error("Eine stornierte Buchung kann nicht abgehakt werden.");
+  }
+
+  entry.in_kind_completed_at = completed ? new Date().toISOString() : null;
+  entry.in_kind_completed_by_member_id = completed ? admin.id : null;
+  entry.in_kind_completed_by_name = completed ? admin.display_name : null;
   await saveTeamState(state);
   revalidateAll();
 }

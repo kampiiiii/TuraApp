@@ -1,5 +1,5 @@
-import { Ban } from "lucide-react";
-import { voidLedgerEntryAction } from "@/app/actions";
+import { Ban, Check, RotateCcw } from "lucide-react";
+import { setInKindCompletionAction, voidLedgerEntryAction } from "@/app/actions";
 import { formatMoney } from "@/lib/money";
 import type { LedgerEntry, Team } from "@/lib/types";
 import { StatusPill } from "@/components/status-pill";
@@ -56,6 +56,11 @@ export function LedgerTable({
                     <strong>{entry.description}</strong>
                     {entry.notes ? <small>{entry.notes}</small> : null}
                     {entry.source === "player" ? <small className="booking-source">Vom Spieler selbst gebucht</small> : null}
+                    {entry.in_kind_label ? (
+                      <small className={entry.in_kind_completed_at ? "in-kind-entry-state completed" : "in-kind-entry-state open"}>
+                        Sachleistung: {entry.in_kind_label} ({entry.in_kind_completed_at ? "mitgebracht" : "offen"})
+                      </small>
+                    ) : null}
                     {entry.void_reason ? <small>Storno: {entry.void_reason}</small> : null}
                   </span>
                 </td>
@@ -67,6 +72,20 @@ export function LedgerTable({
                 {canVoid ? (
                   <td data-label="Aktion" data-wide="true">
                     <span className="ledger-actions">
+                      {entry.in_kind_label && entry.status !== "voided" ? (
+                        <form action={setInKindCompletionAction} className="inline-action">
+                          <input type="hidden" name="entry_id" value={entry.id} />
+                          <input type="hidden" name="completed" value={entry.in_kind_completed_at ? "false" : "true"} />
+                          <button
+                            className="icon-button"
+                            type="submit"
+                            title={entry.in_kind_completed_at ? "Sachleistung wieder oeffnen" : "Sachleistung abhaken"}
+                            disabled={disabled}
+                          >
+                            {entry.in_kind_completed_at ? <RotateCcw size={16} /> : <Check size={16} />}
+                          </button>
+                        </form>
+                      ) : null}
                       {entry.status !== "voided" ? (
                         <form action={voidLedgerEntryAction} className="inline-action">
                           <input type="hidden" name="entry_id" value={entry.id} />

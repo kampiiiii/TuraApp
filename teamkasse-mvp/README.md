@@ -48,8 +48,8 @@ Netlify-Einstellungen:
 ## Enthaltene MVP-Funktionen
 
 - Rollen: Admin/Kassenwart und Spieler
-- Admin: Spieler und Rollen verwalten, Katalog pflegen, Strafen/Getraenke/Zahlungen buchen, Eintraege stornieren oder loeschen
-- Spieler: eigene Buchungen, Zahlungen, Summen und Gesamtsaldo sehen
+- Admin: Spieler und Rollen verwalten, Katalog sortieren, Strafen/Getraenke/Zahlungen buchen, Sachleistungen abhaken sowie Eintraege stornieren oder loeschen
+- Spieler: eigene Buchungen, Zahlungen, Sachleistungen, Summen und Gesamtsaldo sehen sowie die eigene PIN aendern
 - Neue Spieler: eigener Zugang per Mannschaftscode, Name und PIN
 - Historie: geloeschte Spieler werden aus dem Login entfernt, ihre vorhandenen Buchungen und Salden bleiben erhalten
 - Server-Aktionen pruefen Adminrechte, Spieler bekommen nur eigene Daten

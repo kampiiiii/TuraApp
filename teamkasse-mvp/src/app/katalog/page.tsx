@@ -41,7 +41,13 @@ function CatalogColumn({
   currency
 }: {
   title: string;
-  items: Array<{ id: string; name: string; description: string | null; amount_cents: number }>;
+  items: Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    in_kind_label: string | null;
+    amount_cents: number;
+  }>;
   currency?: string;
 }) {
   return (
@@ -55,6 +61,7 @@ function CatalogColumn({
           <span>
             <strong>{item.name}</strong>
             {item.description ? <small>{item.description}</small> : null}
+            {item.in_kind_label ? <small className="in-kind-catalog-label">+ {item.in_kind_label}</small> : null}
           </span>
           <strong>{formatMoney(item.amount_cents, currency)}</strong>
         </div>

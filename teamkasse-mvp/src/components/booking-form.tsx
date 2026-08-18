@@ -56,6 +56,7 @@ export function BookingForm({
               {fines.map((item) => (
                 <option value={item.id} key={item.id}>
                   {item.name} ({formatMoney(item.amount_cents, team?.currency)})
+                  {item.in_kind_label ? ` + ${item.in_kind_label}` : ""}
                 </option>
               ))}
             </optgroup>

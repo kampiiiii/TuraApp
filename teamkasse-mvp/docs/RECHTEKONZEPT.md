@@ -4,7 +4,9 @@
 
 - sieht alle Mitglieder der eigenen Mannschaft
 - pflegt Strafenkatalog und Getraenkekatalog
+- sortiert Katalogpositionen und verschiebt sie nach oben oder unten
 - bucht Strafen, Getraenke, Zahlungen und Anpassungen
+- hakt mitgebrachte Sachleistungen ab oder oeffnet sie wieder
 - aendert Mitgliederrollen zwischen Spieler und Admin
 - loescht Spielerzugaenge, ohne deren Finanzhistorie zu entfernen
 - storniert oder loescht Buchungen
@@ -16,6 +18,8 @@
 - legt den Zugang beim ersten Mal mit dem Mannschaftscode selbst an
 - sieht nur eigene Mitgliedschaftsdaten
 - sieht nur eigene Buchungen, Zahlungen und Salden
+- sieht eigene offene und erledigte Sachleistungen
+- aendert die eigene PIN nach Pruefung der bisherigen PIN
 - kann keine Buchungen veraendern
 - kann keine anderen Spieler sehen
 
