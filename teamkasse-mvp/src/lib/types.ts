@@ -76,6 +76,8 @@ export type MemberBalance = {
   adjustment_cents: number;
   payment_cents: number;
   open_charge_cents: number;
+  amount_due_cents: number;
+  credit_cents: number;
   balance_cents: number;
 };
 

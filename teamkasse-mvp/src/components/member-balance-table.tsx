@@ -17,7 +17,7 @@ export function MemberBalanceTable({ balances, team }: { balances: MemberBalance
               <th>Getraenke</th>
               <th>Bezahlt</th>
               <th>Offen</th>
-              <th>Saldo</th>
+              <th>Guthaben</th>
             </tr>
           </thead>
           <tbody>
@@ -29,9 +29,9 @@ export function MemberBalanceTable({ balances, team }: { balances: MemberBalance
                 <td data-label="Strafen">{formatMoney(balance.fine_cents, team?.currency)}</td>
                 <td data-label="Getraenke">{formatMoney(balance.drink_cents, team?.currency)}</td>
                 <td data-label="Bezahlt">{formatMoney(balance.payment_cents, team?.currency)}</td>
-                <td data-label="Offen">{formatMoney(balance.open_charge_cents, team?.currency)}</td>
-                <td data-label="Saldo">
-                  <strong>{formatMoney(balance.balance_cents, team?.currency)}</strong>
+                <td data-label="Offen">{formatMoney(balance.amount_due_cents, team?.currency)}</td>
+                <td data-label="Guthaben">
+                  <strong>{formatMoney(balance.credit_cents, team?.currency)}</strong>
                 </td>
               </tr>
             ))}

@@ -184,6 +184,8 @@ const balances: MemberBalance[] = members
       open_charge_cents: entries
         .filter((entry) => entry.type !== "payment" && entry.total_amount_cents > 0)
         .reduce((total, entry) => total + Math.max(0, entry.total_amount_cents - entry.settled_amount_cents), 0),
+      amount_due_cents: Math.max(0, sum(() => true)),
+      credit_cents: Math.max(0, -sum(() => true)),
       balance_cents: sum(() => true)
     };
   });

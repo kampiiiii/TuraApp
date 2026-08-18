@@ -110,6 +110,8 @@ export function calculateBalances(state: TeamState, memberId?: string): MemberBa
       adjustment_cents: 0,
       payment_cents: 0,
       open_charge_cents: 0,
+      amount_due_cents: 0,
+      credit_cents: 0,
       balance_cents: 0
     });
   }
@@ -131,6 +133,8 @@ export function calculateBalances(state: TeamState, memberId?: string): MemberBa
         adjustment_cents: 0,
         payment_cents: 0,
         open_charge_cents: 0,
+        amount_due_cents: 0,
+        credit_cents: 0,
         balance_cents: 0
       };
       balances.set(entry.member_id, balance);
@@ -150,7 +154,11 @@ export function calculateBalances(state: TeamState, memberId?: string): MemberBa
     balance.balance_cents += entry.total_amount_cents;
   }
 
-  return Array.from(balances.values());
+  return Array.from(balances.values()).map((balance) => ({
+    ...balance,
+    amount_due_cents: Math.max(0, balance.balance_cents),
+    credit_cents: Math.max(0, -balance.balance_cents)
+  }));
 }
 
 export function attachLedgerNames(

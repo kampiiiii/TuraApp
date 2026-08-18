@@ -344,7 +344,7 @@ select:disabled {
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -1222,11 +1222,14 @@ select:focus {
     padding: 24px;
   }
 
-  .metric-grid,
   .admin-grid,
   .catalog-page-grid,
   .split-section {
     grid-template-columns: 1fr;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .booking-grid {

@@ -48,10 +48,19 @@ export default async function DashboardPage() {
       {!isAdmin && currentBalance ? (
         <section className="pay-preview">
           <span>
-            <strong>Aktuell offen</strong>
-            <small>SEPA-QR ist als naechster Schritt vorbereitet.</small>
+            <strong>{currentBalance.credit_cents > 0 ? "Dein Guthaben" : "Aktuell offen"}</strong>
+            <small>
+              {currentBalance.credit_cents > 0
+                ? "Das Guthaben wird automatisch mit neuen Buchungen verrechnet."
+                : "Zahlungen werden automatisch mit den aeltesten offenen Buchungen verrechnet."}
+            </small>
           </span>
-          <strong>{formatMoney(currentBalance.balance_cents, data.team?.currency)}</strong>
+          <strong>
+            {formatMoney(
+              currentBalance.credit_cents > 0 ? currentBalance.credit_cents : currentBalance.amount_due_cents,
+              data.team?.currency
+            )}
+          </strong>
         </section>
       ) : null}
 

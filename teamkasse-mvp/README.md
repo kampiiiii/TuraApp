@@ -53,6 +53,7 @@ Netlify-Einstellungen:
 - Neue Spieler: eigener Zugang per Mannschaftscode, Name und PIN
 - Historie: geloeschte Spieler werden aus dem Login entfernt, ihre vorhandenen Buchungen und Salden bleiben erhalten
 - Zahlungen werden automatisch auf die aeltesten offenen Buchungen eines Spielers verteilt; Status: offen, teilbezahlt oder bezahlt
+- Ueberzahlungen bleiben als Guthaben erhalten und werden automatisch mit spaeteren Strafen oder Getraenken verrechnet
 - Server-Aktionen pruefen Adminrechte, Spieler bekommen nur eigene Daten
 - PWA-Grundlage: Manifest, Icon, Offline-Fallback, Service Worker
 
