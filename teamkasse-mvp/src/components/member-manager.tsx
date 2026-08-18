@@ -1,6 +1,7 @@
 import { Plus, Save } from "lucide-react";
-import { createMemberAction, setMemberPinAction, updateMemberRoleAction } from "@/app/actions";
+import { createMemberAction, updateMemberRoleAction } from "@/app/actions";
 import { DeleteMemberButton } from "@/components/delete-member-button";
+import { MemberPinForm } from "@/components/member-pin-form";
 import type { TeamMember } from "@/lib/types";
 
 export function MemberManager({
@@ -76,20 +77,7 @@ export function MemberManager({
               </button>
             </form>
 
-            <form action={setMemberPinAction} className="pin-form">
-              <input type="hidden" name="member_id" value={member.id} />
-              <input
-                name="access_pin"
-                type="password"
-                inputMode="numeric"
-                placeholder="Neue PIN"
-                disabled={disabled}
-                minLength={4}
-              />
-              <button className="ghost-button" type="submit" disabled={disabled}>
-                PIN
-              </button>
-            </form>
+            <MemberPinForm member={member} disabled={disabled} />
 
             <DeleteMemberButton
               memberId={member.id}

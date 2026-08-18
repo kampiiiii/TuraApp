@@ -774,6 +774,45 @@ select:focus {
   margin-top: 8px;
 }
 
+.member-pin-block {
+  display: grid;
+  gap: 7px;
+}
+
+.member-pin-hint {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.member-pin-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.member-pin-message svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.member-pin-message.success {
+  border-color: color-mix(in srgb, var(--ok) 42%, var(--line));
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.member-pin-message.error {
+  border-color: color-mix(in srgb, var(--danger) 42%, var(--line));
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
 .member-delete-button {
   justify-content: center;
   width: 100%;
@@ -1097,6 +1136,10 @@ select:focus {
   border-color: color-mix(in srgb, var(--danger) 42%, var(--line));
   color: var(--danger);
   background: var(--danger-soft);
+}
+
+.compact-message {
+  margin: 0;
 }
 
 .pin-success-message {

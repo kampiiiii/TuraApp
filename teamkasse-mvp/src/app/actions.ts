@@ -22,6 +22,16 @@ export type PinChangeState = {
   message: string;
 };
 
+export type LoginState = {
+  status: "idle" | "error";
+  message: string;
+};
+
+export type MemberPinState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
 export type SelfDrinkState = {
   status: "idle" | "success" | "error";
   message: string;
@@ -32,12 +42,15 @@ export type RegistrationState = {
   message: string;
 };
 
-export async function loginAdminAction(formData: FormData) {
+export async function loginAdminAction(
+  _previousState: LoginState,
+  formData: FormData
+): Promise<LoginState> {
   const password = String(formData.get("admin_password") ?? "");
   const memberId = String(formData.get("member_id") ?? "");
 
   if (!isAuthConfigured() || !verifyAdminPassword(password)) {
-    throw new Error("Admin-Passwort stimmt nicht.");
+    return { status: "error", message: "Das Admin-Passwort stimmt nicht. Eine Spieler-PIN funktioniert hier nicht." };
   }
 
   const state = await loadTeamState();
@@ -46,19 +59,22 @@ export async function loginAdminAction(formData: FormData) {
   );
 
   if (!admin) {
-    throw new Error("Kein Admin-Mitglied gefunden.");
+    return { status: "error", message: "Bitte ein Admin-Konto auswaehlen." };
   }
 
   await setSessionCookie(admin);
   redirect("/dashboard");
 }
 
-export async function loginPlayerAction(formData: FormData) {
+export async function loginPlayerAction(
+  _previousState: LoginState,
+  formData: FormData
+): Promise<LoginState> {
   const memberId = String(formData.get("member_id") ?? "");
   const pin = String(formData.get("pin") ?? "");
 
   if (!isAuthConfigured()) {
-    throw new Error("Login ist noch nicht eingerichtet.");
+    return { status: "error", message: "Der Login ist noch nicht eingerichtet." };
   }
 
   const state = await loadTeamState();
@@ -67,7 +83,7 @@ export async function loginPlayerAction(formData: FormData) {
   );
 
   if (!member || !verifyPin(pin, member.pin_hash)) {
-    throw new Error("Spieler oder PIN stimmt nicht.");
+    return { status: "error", message: "Spieler oder PIN stimmt nicht. Admin-Konten verwenden das Admin-Passwort." };
   }
 
   await setSessionCookie(member);
@@ -173,23 +189,34 @@ export async function createMemberAction(formData: FormData) {
   revalidateAll();
 }
 
-export async function setMemberPinAction(formData: FormData) {
+export async function setMemberPinAction(
+  _previousState: MemberPinState,
+  formData: FormData
+): Promise<MemberPinState> {
   const { state } = await requireAdmin();
   const memberId = String(formData.get("member_id") ?? "");
   const accessPin = String(formData.get("access_pin") ?? "").trim();
   const member = state.members.find((candidate) => candidate.id === memberId);
 
   if (!member) {
-    throw new Error("Spieler wurde nicht gefunden.");
+    return { status: "error", message: "Das Mitglied wurde nicht gefunden." };
   }
 
   if (accessPin.length < 4) {
-    throw new Error("PIN sollte mindestens 4 Zeichen haben.");
+    return { status: "error", message: "Die PIN muss mindestens 4 Zeichen haben." };
   }
 
   member.pin_hash = hashPin(accessPin);
   await saveTeamState(state);
-  revalidateAll();
+  revalidatePath("/admin");
+
+  return {
+    status: "success",
+    message:
+      member.role === "admin"
+        ? "Spieler-PIN gespeichert. Als Admin erfolgt die Anmeldung weiterhin mit dem Admin-Passwort."
+        : "Neue Spieler-PIN erfolgreich gespeichert."
+  };
 }
 
 export async function updateMemberRoleAction(formData: FormData) {

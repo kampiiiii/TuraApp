@@ -30,7 +30,7 @@ TEAMKASSE_SESSION_SECRET=ein-langes-zufaelliges-geheimnis
 TEAMKASSE_JOIN_CODE=ein-gemeinsamer-mannschaftscode
 ```
 
-Der Kassenwart meldet sich mit dem Admin-Passwort an. Neue Spieler registrieren sich einmalig mit Mannschaftscode, Name und eigener PIN. Danach melden sie sich mit Name und PIN an. Admins koennen Rollen und PINs weiterhin in der Admin-Seite verwalten.
+Der Kassenwart meldet sich mit dem Admin-Passwort an. Neue Spieler registrieren sich einmalig mit Mannschaftscode, Name und eigener PIN. Danach melden sie sich mit Name und PIN an. Admins koennen Rollen und Spieler-PINs weiterhin in der Admin-Seite verwalten. Die bei einem Admin-Konto gespeicherte Spieler-PIN gilt erst wieder, wenn dieses Konto die Rolle `Spieler` erhaelt.
 
 ## Netlify Deployment
 

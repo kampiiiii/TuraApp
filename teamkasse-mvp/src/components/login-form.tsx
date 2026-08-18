@@ -1,5 +1,8 @@
+"use client";
+
+import { useActionState } from "react";
 import { LogIn, ShieldCheck } from "lucide-react";
-import { loginAdminAction, loginPlayerAction } from "@/app/actions";
+import { loginAdminAction, loginPlayerAction, type LoginState } from "@/app/actions";
 import { RegistrationForm } from "@/components/registration-form";
 import type { TeamMember } from "@/lib/types";
 
@@ -12,6 +15,10 @@ export function LoginForm({
   registrationConfigured: boolean;
   members: TeamMember[];
 }) {
+  const initialState: LoginState = { status: "idle", message: "" };
+  const [adminState, adminAction, adminPending] = useActionState(loginAdminAction, initialState);
+  const [playerState, playerAction, playerPending] = useActionState(loginPlayerAction, initialState);
+
   if (!configured) {
     return (
       <section className="login-card">
@@ -31,7 +38,7 @@ export function LoginForm({
     <div className="login-grid">
       <section className="login-card">
         <h2>Kassenwart</h2>
-        <form action={loginAdminAction} className="login-form">
+        <form action={adminAction} className="login-form">
           <label>
             Admin
             <select name="member_id" required>
@@ -44,19 +51,24 @@ export function LoginForm({
             </select>
           </label>
           <label>
-            Admin-Passwort
+            Admin-Passwort (keine Spieler-PIN)
             <input name="admin_password" type="password" autoComplete="current-password" required />
           </label>
-          <button className="primary-button" type="submit">
+          {adminState.status === "error" ? (
+            <p className="form-message error compact-message" role="alert">
+              {adminState.message}
+            </p>
+          ) : null}
+          <button className="primary-button" type="submit" disabled={adminPending}>
             <ShieldCheck size={16} />
-            Als Admin anmelden
+            {adminPending ? "Anmeldung laeuft..." : "Als Admin anmelden"}
           </button>
         </form>
       </section>
 
       <section className="login-card">
         <h2>Spieler</h2>
-        <form action={loginPlayerAction} className="login-form">
+        <form action={playerAction} className="login-form">
           <label>
             Spieler
             <select name="member_id" required>
@@ -72,9 +84,14 @@ export function LoginForm({
             PIN
             <input name="pin" type="password" inputMode="numeric" autoComplete="current-password" required />
           </label>
-          <button className="ghost-button" type="submit">
+          {playerState.status === "error" ? (
+            <p className="form-message error compact-message" role="alert">
+              {playerState.message}
+            </p>
+          ) : null}
+          <button className="ghost-button" type="submit" disabled={playerPending}>
             <LogIn size={16} />
-            Als Spieler anmelden
+            {playerPending ? "Anmeldung laeuft..." : "Als Spieler anmelden"}
           </button>
         </form>
       </section>

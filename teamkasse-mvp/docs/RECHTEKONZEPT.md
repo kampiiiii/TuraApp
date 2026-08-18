@@ -28,6 +28,7 @@
 Die verbindliche Pruefung liegt in Server-Aktionen und Server-Abfragen:
 
 - `TEAMKASSE_ADMIN_PASSWORD` oeffnet den Kassenwart-Zugang.
+- Admin-Konten verwenden keine Spieler-PIN zur Anmeldung. Eine vorhandene PIN bleibt fuer eine spaetere Rueckstufung zum Spieler gespeichert.
 - `TEAMKASSE_JOIN_CODE` schuetzt die Selbstregistrierung vor fremden Anmeldungen.
 - Spieler-PINs werden nicht im Klartext gespeichert, sondern als HMAC-Hash.
 - Die Session liegt als signiertes, `httpOnly` Cookie im Browser.
@@ -35,5 +36,6 @@ Die verbindliche Pruefung liegt in Server-Aktionen und Server-Abfragen:
 - Die Selbstregistrierung kann ausschliesslich Spieler anlegen. Adminrechte vergibt nur ein vorhandener Admin.
 - Der letzte Admin und das aktuell verwendete Admin-Konto sind gegen Herabstufung und Loeschung geschuetzt.
 - Spieler-Abfragen filtern Ledger, Salden und Mitgliedsdaten auf den angemeldeten Spieler.
+- Falsche Login-Daten werden im jeweiligen Formular angezeigt und loesen keine allgemeine Server-Fehlerseite aus.
 
 Wichtig: Wenn spaeter mehrere Mannschaften, Einladungslinks oder echte Bankfunktionen dazukommen, ist Supabase/Postgres mit Row Level Security weiterhin ein guter naechster Sicherheitsausbau.
