@@ -31,6 +31,32 @@ export function LedgerEntryMenu({
 
   return (
     <div className="entry-menu-wrap">
+      <div className="entry-action-row" aria-label="Buchungsaktionen">
+        {canEdit ? (
+          <button className="entry-quick-action" type="button" onClick={() => setEditing(true)} disabled={disabled}>
+            <Pencil size={15} />
+            Bearbeiten
+          </button>
+        ) : null}
+        {entry.status !== "voided" ? (
+          <form
+            action={voidLedgerEntryAction}
+            onSubmit={(event) => {
+              if (!window.confirm("Buchung stornieren? Der Eintrag bleibt in der Historie sichtbar.")) {
+                event.preventDefault();
+              }
+            }}
+          >
+            <input type="hidden" name="entry_id" value={entry.id} />
+            <input type="hidden" name="void_reason" value="Fehleintrag storniert" />
+            <button className="entry-quick-action danger" type="submit" disabled={disabled}>
+              <Ban size={15} />
+              Stornieren
+            </button>
+          </form>
+        ) : null}
+      </div>
+
       <details className="entry-menu">
         <summary className="icon-button" aria-label="Buchungsmenue" title="Buchungsmenue">
           <MoreVertical size={16} />
