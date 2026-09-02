@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Ban, ExternalLink } from "lucide-react";
 import { voidTreasuryEntryAction } from "@/app/actions";
-import { DeleteTreasuryEntryButton } from "@/components/delete-treasury-entry-button";
 import { formatMoney } from "@/lib/money";
 import type { Team, TreasuryBookEntry } from "@/lib/types";
 
@@ -71,7 +70,6 @@ export function TreasuryTable({
                           </button>
                         </form>
                       ) : null}
-                      <DeleteTreasuryEntryButton entryId={entry.id} disabled={disabled} />
                     </span>
                   ) : (
                     <Link className="icon-button" href="/buchungen" title="Spielerzahlung in den Buchungen anzeigen">
