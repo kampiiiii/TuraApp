@@ -4,7 +4,7 @@ import { BalanceCards } from "@/components/balance-cards";
 import { LoginRequired, NoTeamState } from "@/components/empty-state";
 import { LedgerTable } from "@/components/ledger-table";
 import { InKindObligationList } from "@/components/in-kind-obligation-list";
-import { MemberBalanceTable } from "@/components/member-balance-table";
+import { MemberDashboard } from "@/components/member-dashboard";
 import { PageHeader } from "@/components/page-header";
 import { SelfDrinkForm } from "@/components/self-drink-form";
 import { TreasurySummary } from "@/components/treasury-summary";
@@ -69,7 +69,16 @@ export default async function DashboardPage() {
 
       {!isAdmin ? <SelfDrinkForm catalog={data.catalog} team={data.team} /> : null}
 
-      {isAdmin ? <MemberBalanceTable balances={data.balances} team={data.team} /> : null}
+      {isAdmin ? (
+        <MemberDashboard
+          balances={data.balances}
+          ledger={data.ledger}
+          members={data.members}
+          catalog={data.catalog}
+          team={data.team}
+          disabled={data.isDemo}
+        />
+      ) : null}
 
       <InKindObligationList entries={data.ledger} canManage={isAdmin} disabled={data.isDemo} />
 
@@ -82,7 +91,14 @@ export default async function DashboardPage() {
               <ArrowRight size={16} />
             </Link>
           </div>
-          <LedgerTable entries={openEntries.slice(0, 6)} team={data.team} />
+          <LedgerTable
+            entries={openEntries.slice(0, 6)}
+            team={data.team}
+            members={data.members}
+            catalog={data.catalog}
+            canVoid={isAdmin}
+            disabled={data.isDemo}
+          />
         </div>
 
         {isAdmin ? (
