@@ -31,9 +31,9 @@ export function LedgerEntryMenu({
 
   return (
     <div className="entry-menu-wrap">
-      <div className="entry-action-row" aria-label="Buchungsaktionen">
+      <div className="button-row" aria-label="Buchungsaktionen">
         {canEdit ? (
-          <button className="entry-quick-action" type="button" onClick={() => setEditing(true)} disabled={disabled}>
+          <button className="ghost-button compact-button" type="button" onClick={() => setEditing(true)} disabled={disabled}>
             <Pencil size={15} />
             Bearbeiten
           </button>
@@ -49,7 +49,7 @@ export function LedgerEntryMenu({
           >
             <input type="hidden" name="entry_id" value={entry.id} />
             <input type="hidden" name="void_reason" value="Fehleintrag storniert" />
-            <button className="entry-quick-action danger" type="submit" disabled={disabled}>
+            <button className="ghost-button compact-button member-delete-button" type="submit" disabled={disabled}>
               <Ban size={15} />
               Stornieren
             </button>
