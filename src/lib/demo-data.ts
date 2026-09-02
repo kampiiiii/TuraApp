@@ -115,6 +115,9 @@ const ledger: LedgerEntry[] = [
     interest_for_entry_id: null,
     interest_period: null,
     void_reason: null,
+    voided_at: null,
+    voided_by_member_id: null,
+    voided_by_name: null,
     created_at: "2026-08-12T18:10:00Z"
   },
   {
@@ -146,6 +149,9 @@ const ledger: LedgerEntry[] = [
     interest_for_entry_id: null,
     interest_period: null,
     void_reason: null,
+    voided_at: null,
+    voided_by_member_id: null,
+    voided_by_name: null,
     created_at: "2026-08-14T21:00:00Z"
   },
   {
@@ -177,6 +183,9 @@ const ledger: LedgerEntry[] = [
     interest_for_entry_id: null,
     interest_period: null,
     void_reason: null,
+    voided_at: null,
+    voided_by_member_id: null,
+    voided_by_name: null,
     created_at: "2026-08-15T19:00:00Z"
   }
 ];
