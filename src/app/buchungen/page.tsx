@@ -25,11 +25,18 @@ export default async function BookingsPage() {
         title={isAdmin ? "Alle Buchungen" : "Meine Buchungen"}
         description={
           isAdmin
-            ? "Stornieren bleibt nachvollziehbar. Dauerhaftes Loeschen entfernt einen Eintrag vollstaendig."
+            ? "Bearbeiten legt nachvollziehbare Korrekturen an. Stornierte Eintraege bleiben sichtbar."
             : "Stornierte Eintraege bleiben sichtbar, damit die Kasse nachvollziehbar bleibt."
         }
       />
-      <LedgerTable entries={data.ledger} team={data.team} canVoid={isAdmin} disabled={data.isDemo} />
+      <LedgerTable
+        entries={data.ledger}
+        team={data.team}
+        members={data.members}
+        catalog={data.catalog}
+        canVoid={isAdmin}
+        disabled={data.isDemo}
+      />
     </div>
   );
 }
