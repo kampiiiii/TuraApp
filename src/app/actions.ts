@@ -686,6 +686,78 @@ export async function createLedgerEntryAction(formData: FormData) {
   revalidateAll();
 }
 
+export async function createBulkPaymentAction(formData: FormData) {
+  const { state, member: admin } = await requireAdmin();
+  const memberIds = Array.from(new Set(formData.getAll("member_ids").map(String).filter(Boolean)));
+  const fixedAmountCents = Math.abs(parseEuroToCents(formData.get("amount")));
+  const bookingDate = String(formData.get("booking_date") ?? "").trim() || new Date().toISOString().slice(0, 10);
+  const description = String(formData.get("description") ?? "").trim() || "Sammelzahlung erhalten";
+  const now = new Date().toISOString();
+
+  if (!memberIds.length) {
+    throw new Error("Bitte mindestens einen Spieler auswaehlen.");
+  }
+
+  const membersById = new Map(state.members.map((member) => [member.id, member]));
+  const openAmountByMember = calculateOpenAmountByMember(state.ledger);
+  const newEntries: LedgerEntry[] = [];
+
+  for (const memberId of memberIds) {
+    const bookedMember = membersById.get(memberId);
+    if (!bookedMember || bookedMember.team_id !== state.team.id || !bookedMember.active) {
+      throw new Error("Ein ausgewaehlter Spieler wurde nicht gefunden.");
+    }
+
+    const amountCents = fixedAmountCents || Math.max(0, openAmountByMember.get(memberId) ?? 0);
+    if (amountCents <= 0) {
+      continue;
+    }
+
+    newEntries.push({
+      id: randomUUID(),
+      team_id: state.team.id,
+      member_id: memberId,
+      member_name: bookedMember.display_name,
+      catalog_item_id: null,
+      catalog_item_name: null,
+      type: "payment",
+      description,
+      quantity: 1,
+      unit_amount_cents: -amountCents,
+      total_amount_cents: -amountCents,
+      settled_amount_cents: amountCents,
+      status: "paid",
+      booking_date: bookingDate,
+      notes: "Sammelzahlung",
+      in_kind_label: null,
+      in_kind_completed_at: null,
+      in_kind_completed_by_member_id: null,
+      in_kind_completed_by_name: null,
+      source: "admin",
+      created_by_member_id: admin.id,
+      created_by_name: admin.display_name,
+      correction_of: null,
+      recurring_plan_id: null,
+      recurring_period: null,
+      interest_for_entry_id: null,
+      interest_period: null,
+      void_reason: null,
+      voided_at: null,
+      voided_by_member_id: null,
+      voided_by_name: null,
+      created_at: now
+    });
+  }
+
+  if (!newEntries.length) {
+    throw new Error("Fuer die Auswahl gibt es keinen offenen Betrag oder keinen Zahlungsbetrag.");
+  }
+
+  state.ledger.unshift(...newEntries);
+  await saveTeamState(state);
+  revalidateAll();
+}
+
 export async function updateLedgerEntryAction(formData: FormData) {
   const { state, member: admin } = await requireAdmin();
   const entryId = String(formData.get("entry_id") ?? "");
@@ -1003,6 +1075,20 @@ function defaultLedgerDescription(type: LedgerType) {
 
 function isEditableLedgerType(type: LedgerType) {
   return type === "fine" || type === "drink" || type === "payment" || type === "adjustment";
+}
+
+function calculateOpenAmountByMember(ledger: LedgerEntry[]) {
+  const result = new Map<string, number>();
+
+  for (const entry of ledger) {
+    if (entry.status === "voided") {
+      continue;
+    }
+
+    result.set(entry.member_id, (result.get(entry.member_id) ?? 0) + entry.total_amount_cents);
+  }
+
+  return result;
 }
 
 function normalizeTreasuryEntryType(value: FormDataEntryValue | null): TreasuryEntryType {
