@@ -335,6 +335,34 @@ export async function createCatalogItemAction(formData: FormData) {
   revalidateAll();
 }
 
+export async function updateCatalogItemAction(formData: FormData) {
+  const { state } = await requireAdmin();
+  const itemId = String(formData.get("item_id") ?? "");
+  const item = state.catalog.find((candidate) => candidate.id === itemId && candidate.team_id === state.team.id);
+  const type = normalizeCatalogType(formData.get("type"));
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+  const inKindLabel = String(formData.get("in_kind_label") ?? "").trim() || null;
+  const amountCents = parseEuroToCents(formData.get("amount"));
+
+  if (!item) {
+    throw new Error("Katalogeintrag wurde nicht gefunden.");
+  }
+
+  if (!name) {
+    throw new Error("Name fehlt.");
+  }
+
+  item.type = type;
+  item.name = name;
+  item.description = description;
+  item.in_kind_label = inKindLabel;
+  item.amount_cents = amountCents;
+
+  await saveTeamState(state);
+  revalidateAll();
+}
+
 export async function deleteCatalogItemAction(formData: FormData) {
   const { state } = await requireAdmin();
   const itemId = String(formData.get("item_id") ?? "");
