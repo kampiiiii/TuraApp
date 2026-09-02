@@ -134,6 +134,9 @@ function entry(overrides: Partial<LedgerEntry>): LedgerEntry {
     interest_for_entry_id: null,
     interest_period: null,
     void_reason: null,
+    voided_at: null,
+    voided_by_member_id: null,
+    voided_by_name: null,
     created_at: "2026-01-01T00:00:00.000Z",
     ...overrides
   };
