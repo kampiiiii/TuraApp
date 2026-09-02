@@ -268,6 +268,9 @@ export function applyRecurringCharges(state: TeamState, today = todayInBerlin())
           interest_for_entry_id: null,
           interest_period: null,
           void_reason: null,
+          voided_at: null,
+          voided_by_member_id: null,
+          voided_by_name: null,
           created_at: generatedAt
         });
         changed = true;
@@ -346,6 +349,9 @@ export function applyRecurringCharges(state: TeamState, today = todayInBerlin())
             interest_for_entry_id: principal.id,
             interest_period: checkpoint,
             void_reason: null,
+            voided_at: null,
+            voided_by_member_id: null,
+            voided_by_name: null,
             created_at: generatedAt
           });
           changed = true;
@@ -531,11 +537,14 @@ function normalizeState(state: TeamState): TeamState {
     recurring_period: entry.recurring_period ?? null,
     interest_for_entry_id: entry.interest_for_entry_id ?? null,
     interest_period: entry.interest_period ?? null,
-    void_reason: entry.void_reason ?? null
+    void_reason: entry.void_reason ?? null,
+    voided_at: entry.voided_at ?? null,
+    voided_by_member_id: entry.voided_by_member_id ?? null,
+    voided_by_name: entry.voided_by_name ?? null
   }));
 
   return {
-    version: Math.max(state.version || 1, 4),
+    version: Math.max(state.version || 1, 5),
     team: {
       ...state.team,
       currency: state.team.currency || "EUR"

@@ -14,8 +14,8 @@ import {
   verifyPin
 } from "@/lib/auth";
 import { parseEuroToCents, parseQuantity } from "@/lib/money";
-import { attachLedgerNames, loadTeamState, recurringSuppressionKey, saveTeamState } from "@/lib/team-store";
-import type { CatalogItem, CatalogType, LedgerType, StoredTeamMember, TreasuryEntryType } from "@/lib/types";
+import { attachLedgerNames, loadTeamState, saveTeamState } from "@/lib/team-store";
+import type { CatalogItem, CatalogType, LedgerEntry, LedgerType, StoredTeamMember, TreasuryEntryType } from "@/lib/types";
 
 export type PinChangeState = {
   status: "idle" | "success" | "error";
@@ -556,6 +556,9 @@ export async function createSelfDrinkAction(
     interest_for_entry_id: null,
     interest_period: null,
     void_reason: null,
+    voided_at: null,
+    voided_by_member_id: null,
+    voided_by_name: null,
     created_at: new Date().toISOString()
   });
 
@@ -645,9 +648,124 @@ export async function createLedgerEntryAction(formData: FormData) {
     interest_for_entry_id: null,
     interest_period: null,
     void_reason: null,
+    voided_at: null,
+    voided_by_member_id: null,
+    voided_by_name: null,
     created_at: new Date().toISOString()
   });
 
+  await saveTeamState(state);
+  revalidateAll();
+}
+
+export async function updateLedgerEntryAction(formData: FormData) {
+  const { state, member: admin } = await requireAdmin();
+  const entryId = String(formData.get("entry_id") ?? "");
+  const original = state.ledger.find((candidate) => candidate.id === entryId);
+
+  if (!original) {
+    throw new Error("Buchung fehlt.");
+  }
+
+  if (original.status === "voided") {
+    throw new Error("Stornierte Buchungen koennen nicht bearbeitet werden.");
+  }
+
+  if (!isEditableLedgerType(original.type)) {
+    throw new Error("Diese Buchungsart kann nur storniert werden.");
+  }
+
+  const type = normalizeLedgerType(formData.get("type"));
+  const memberId = String(formData.get("member_id") ?? original.member_id);
+  const submittedCatalogItemId = String(formData.get("catalog_item_id") ?? "") || null;
+  const catalogItemId = type === "payment" || type === "adjustment" ? null : submittedCatalogItemId;
+  const manualDescription = String(formData.get("description") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const quantity = parseQuantity(formData.get("quantity"));
+  const bookingDate = String(formData.get("booking_date") ?? "").trim() || original.booking_date;
+  const bookedMember = state.members.find((candidate) => candidate.id === memberId && candidate.team_id === state.team.id);
+
+  if (!bookedMember) {
+    throw new Error("Spieler wurde nicht gefunden.");
+  }
+
+  let unitAmountCents = parseEuroToCents(formData.get("amount"));
+  let description = manualDescription;
+  let selectedCatalogItem: CatalogItem | null = null;
+
+  if (catalogItemId && type !== "payment" && type !== "adjustment") {
+    selectedCatalogItem =
+      state.catalog.find((candidate) => candidate.id === catalogItemId && candidate.team_id === state.team.id) ?? null;
+
+    if (!selectedCatalogItem) {
+      throw new Error("Katalogeintrag wurde nicht gefunden.");
+    }
+
+    if (unitAmountCents === 0) {
+      unitAmountCents = selectedCatalogItem.amount_cents;
+    }
+    description = manualDescription || selectedCatalogItem.name;
+  }
+
+  if (!description) {
+    description = defaultLedgerDescription(type);
+  }
+
+  if (unitAmountCents === 0 && !selectedCatalogItem?.in_kind_label) {
+    throw new Error("Betrag fehlt.");
+  }
+
+  if (type === "payment") {
+    unitAmountCents = -Math.abs(unitAmountCents);
+  } else if (type !== "adjustment") {
+    unitAmountCents = Math.abs(unitAmountCents);
+  }
+
+  const totalAmountCents = Math.round(unitAmountCents * quantity);
+  const now = new Date().toISOString();
+
+  original.status = "voided";
+  original.void_reason = `Korrigiert am ${now.slice(0, 10)} durch ${admin.display_name}`;
+  original.voided_at = now;
+  original.voided_by_member_id = admin.id;
+  original.voided_by_name = admin.display_name;
+
+  const correctedEntry: LedgerEntry = {
+    id: randomUUID(),
+    team_id: state.team.id,
+    member_id: memberId,
+    member_name: bookedMember.display_name,
+    catalog_item_id: catalogItemId,
+    catalog_item_name: selectedCatalogItem?.name ?? null,
+    type,
+    description,
+    quantity,
+    unit_amount_cents: unitAmountCents,
+    total_amount_cents: totalAmountCents,
+    settled_amount_cents: type === "payment" ? Math.abs(totalAmountCents) : 0,
+    status: type === "payment" ? "paid" : "open",
+    booking_date: bookingDate,
+    notes,
+    in_kind_label: selectedCatalogItem?.in_kind_label ?? null,
+    in_kind_completed_at: null,
+    in_kind_completed_by_member_id: null,
+    in_kind_completed_by_name: null,
+    source: "admin",
+    created_by_member_id: admin.id,
+    created_by_name: admin.display_name,
+    correction_of: original.id,
+    recurring_plan_id: null,
+    recurring_period: null,
+    interest_for_entry_id: null,
+    interest_period: null,
+    void_reason: null,
+    voided_at: null,
+    voided_by_member_id: null,
+    voided_by_name: null,
+    created_at: now
+  };
+
+  state.ledger.unshift(correctedEntry);
   await saveTeamState(state);
   revalidateAll();
 }
@@ -696,6 +814,10 @@ export async function voidTreasuryEntryAction(formData: FormData) {
     throw new Error("Kassenbucheintrag wurde nicht gefunden.");
   }
 
+  if (entry.status === "voided") {
+    return;
+  }
+
   entry.status = "voided";
   entry.void_reason = "Fehleintrag storniert";
   await saveTeamState(state);
@@ -708,21 +830,26 @@ export async function deleteTreasuryEntryAction(formData: FormData) {
   const confirmation = String(formData.get("confirm_delete") ?? "");
 
   if (confirmation !== "delete-treasury-entry") {
-    throw new Error("Das Loeschen wurde nicht bestaetigt.");
+    throw new Error("Storno wurde nicht bestaetigt.");
   }
 
-  const entryIndex = state.treasury_entries.findIndex((entry) => entry.id === entryId);
-  if (entryIndex < 0) {
+  const entry = state.treasury_entries.find((candidate) => candidate.id === entryId);
+  if (!entry) {
     throw new Error("Kassenbucheintrag wurde nicht gefunden.");
   }
 
-  state.treasury_entries.splice(entryIndex, 1);
+  if (entry.status === "voided") {
+    return;
+  }
+
+  entry.status = "voided";
+  entry.void_reason = entry.void_reason ?? "Storno statt dauerhaftem Loeschen";
   await saveTeamState(state);
   revalidateAll();
 }
 
 export async function voidLedgerEntryAction(formData: FormData) {
-  const { state } = await requireAdmin();
+  const { state, member: admin } = await requireAdmin();
   const entryId = String(formData.get("entry_id") ?? "");
   const reason = String(formData.get("void_reason") ?? "").trim() || "Storno durch Kassenwart";
   const entry = state.ledger.find((candidate) => candidate.id === entryId);
@@ -731,33 +858,42 @@ export async function voidLedgerEntryAction(formData: FormData) {
     throw new Error("Buchung fehlt.");
   }
 
+  if (entry.status === "voided") {
+    return;
+  }
+
   entry.status = "voided";
   entry.void_reason = reason;
+  entry.voided_at = new Date().toISOString();
+  entry.voided_by_member_id = admin.id;
+  entry.voided_by_name = admin.display_name;
   await saveTeamState(state);
   revalidateAll();
 }
 
 export async function deleteLedgerEntryAction(formData: FormData) {
-  const { state } = await requireAdmin();
+  const { state, member: admin } = await requireAdmin();
   const entryId = String(formData.get("entry_id") ?? "");
   const confirmation = String(formData.get("confirm_delete") ?? "");
 
   if (confirmation !== "permanent") {
-    throw new Error("Dauerhaftes Loeschen wurde nicht bestaetigt.");
+    throw new Error("Storno wurde nicht bestaetigt.");
   }
 
-  const entryIndex = state.ledger.findIndex((entry) => entry.id === entryId);
-  if (entryIndex < 0) {
+  const entry = state.ledger.find((candidate) => candidate.id === entryId);
+  if (!entry) {
     throw new Error("Buchung fehlt.");
   }
 
-  const entry = state.ledger[entryIndex];
-  const suppressionKey = recurringSuppressionKey(entry);
-  if (suppressionKey && !state.suppressed_recurring_entries.includes(suppressionKey)) {
-    state.suppressed_recurring_entries.push(suppressionKey);
+  if (entry.status === "voided") {
+    return;
   }
 
-  state.ledger.splice(entryIndex, 1);
+  entry.status = "voided";
+  entry.void_reason = entry.void_reason ?? "Storno statt dauerhaftem Loeschen";
+  entry.voided_at = entry.voided_at ?? new Date().toISOString();
+  entry.voided_by_member_id = entry.voided_by_member_id ?? admin.id;
+  entry.voided_by_name = entry.voided_by_name ?? admin.display_name;
   await saveTeamState(state);
   revalidateAll();
 }
@@ -828,6 +964,17 @@ function normalizeLedgerType(value: FormDataEntryValue | null): LedgerType {
   }
 
   return "fine";
+}
+
+function defaultLedgerDescription(type: LedgerType) {
+  if (type === "payment") return "Zahlung erhalten";
+  if (type === "drink") return "Getraenk";
+  if (type === "adjustment") return "Anpassung";
+  return "Manuelle Buchung";
+}
+
+function isEditableLedgerType(type: LedgerType) {
+  return type === "fine" || type === "drink" || type === "payment" || type === "adjustment";
 }
 
 function normalizeTreasuryEntryType(value: FormDataEntryValue | null): TreasuryEntryType {

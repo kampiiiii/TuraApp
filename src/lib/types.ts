@@ -71,6 +71,9 @@ export type LedgerEntry = {
   interest_for_entry_id: string | null;
   interest_period: string | null;
   void_reason: string | null;
+  voided_at: string | null;
+  voided_by_member_id: string | null;
+  voided_by_name: string | null;
   created_at: string;
 };
 

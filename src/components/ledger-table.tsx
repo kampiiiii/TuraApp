@@ -1,18 +1,20 @@
-import { Ban, Check, RotateCcw } from "lucide-react";
-import { setInKindCompletionAction, voidLedgerEntryAction } from "@/app/actions";
-import { formatMoney } from "@/lib/money";
-import type { LedgerEntry, Team } from "@/lib/types";
+import { LedgerEntryMenu } from "@/components/ledger-entry-menu";
 import { StatusPill } from "@/components/status-pill";
-import { DeleteLedgerEntryButton } from "@/components/delete-ledger-entry-button";
+import { formatMoney } from "@/lib/money";
+import type { CatalogItem, LedgerEntry, Team, TeamMember } from "@/lib/types";
 
 export function LedgerTable({
   entries,
   team,
+  members = [],
+  catalog = [],
   canVoid = false,
   disabled = false
 }: {
   entries: LedgerEntry[];
   team: Team | null;
+  members?: TeamMember[];
+  catalog?: CatalogItem[];
   canVoid?: boolean;
   disabled?: boolean;
 }) {
@@ -63,6 +65,13 @@ export function LedgerTable({
                       </small>
                     ) : null}
                     {entry.void_reason ? <small>Storno: {entry.void_reason}</small> : null}
+                    {entry.voided_at || entry.voided_by_name ? (
+                      <small>
+                        Storniert {entry.voided_at ? `am ${formatDate(entry.voided_at)}` : ""}
+                        {entry.voided_by_name ? ` durch ${entry.voided_by_name}` : ""}
+                      </small>
+                    ) : null}
+                    {entry.correction_of ? <small>Korrektur zu vorheriger Buchung</small> : null}
                   </span>
                 </td>
                 <td data-label="Menge">{entry.quantity}</td>
@@ -79,32 +88,7 @@ export function LedgerTable({
                 </td>
                 {canVoid ? (
                   <td data-label="Aktion" data-wide="true">
-                    <span className="ledger-actions">
-                      {entry.in_kind_label && entry.status !== "voided" ? (
-                        <form action={setInKindCompletionAction} className="inline-action">
-                          <input type="hidden" name="entry_id" value={entry.id} />
-                          <input type="hidden" name="completed" value={entry.in_kind_completed_at ? "false" : "true"} />
-                          <button
-                            className="icon-button"
-                            type="submit"
-                            title={entry.in_kind_completed_at ? "Sachleistung wieder oeffnen" : "Sachleistung abhaken"}
-                            disabled={disabled}
-                          >
-                            {entry.in_kind_completed_at ? <RotateCcw size={16} /> : <Check size={16} />}
-                          </button>
-                        </form>
-                      ) : null}
-                      {entry.status !== "voided" ? (
-                        <form action={voidLedgerEntryAction} className="inline-action">
-                          <input type="hidden" name="entry_id" value={entry.id} />
-                          <input type="hidden" name="void_reason" value="Fehleintrag storniert" />
-                          <button className="icon-button danger" type="submit" title="Buchung stornieren" disabled={disabled}>
-                            <Ban size={16} />
-                          </button>
-                        </form>
-                      ) : null}
-                      <DeleteLedgerEntryButton entryId={entry.id} disabled={disabled} />
-                    </span>
+                    <LedgerEntryMenu entry={entry} members={members} catalog={catalog} team={team} disabled={disabled} />
                   </td>
                 ) : null}
               </tr>
