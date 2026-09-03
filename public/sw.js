@@ -1,4 +1,4 @@
-const CACHE_NAME = "tura-shell-v6";
+const CACHE_NAME = "tura-shell-v7";
 const APP_SHELL = ["/offline", "/manifest.webmanifest", "/icons/tura-icon-v2.svg"];
 const STATIC_DESTINATIONS = new Set(["font", "image", "script", "style"]);
 
@@ -53,3 +53,4 @@ self.addEventListener("fetch", (event) => {
     );
   }
 });
+
