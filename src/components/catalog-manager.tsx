@@ -146,7 +146,7 @@ function CatalogList({
   const remainingCount = items.length - visibleItems.length;
 
   return (
-    <details className="catalog-group" defaultOpen>
+    <details className="catalog-group" open>
       <summary className="catalog-group-heading">
         <span className="section-icon compact">{icon}</span>
         <h3>{title}</h3>
