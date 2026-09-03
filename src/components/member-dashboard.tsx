@@ -60,7 +60,6 @@ export function MemberDashboard({
 
   const openBalances = filteredBalances.filter((balance) => balance.amount_due_cents > 0);
   const settledBalances = filteredBalances.filter((balance) => balance.amount_due_cents <= 0);
-  const paymentSelection = balances.filter((balance) => paymentMemberIds.includes(balance.member_id));
   const selectedBalance =
     filteredBalances.find((balance) => balance.member_id === selectedMemberId) ??
     balances.find((balance) => balance.member_id === selectedMemberId) ??
@@ -124,7 +123,6 @@ export function MemberDashboard({
         <div className="player-list-panel">
           <BulkPaymentPanel
             balances={balances}
-            selectedBalances={paymentSelection}
             selectedMemberIds={paymentMemberIds}
             setSelectedMemberIds={setPaymentMemberIds}
             team={team}
@@ -183,6 +181,7 @@ export function MemberDashboard({
           balance={selectedBalance}
           member={selectedMember}
           entries={selectedEntries}
+          onClose={() => setSelectedMemberId(null)}
           members={members}
           catalog={catalog}
           team={team}
@@ -256,20 +255,19 @@ function PlayerRows({
 
 function BulkPaymentPanel({
   balances,
-  selectedBalances,
   selectedMemberIds,
   setSelectedMemberIds,
   team,
   disabled
 }: {
   balances: MemberBalance[];
-  selectedBalances: MemberBalance[];
   selectedMemberIds: string[];
   setSelectedMemberIds: Dispatch<SetStateAction<string[]>>;
   team: Team | null;
   disabled: boolean;
 }) {
   const openBalances = balances.filter((balance) => balance.amount_due_cents > 0);
+  const selectedBalances = balances.filter((balance) => selectedMemberIds.includes(balance.member_id));
   const selectedOpenTotal = selectedBalances.reduce((sum, balance) => sum + Math.max(0, balance.amount_due_cents), 0);
 
   return (
@@ -302,13 +300,33 @@ function BulkPaymentPanel({
         </button>
       </div>
       <form action={createBulkPaymentAction} className="bulk-payment-form">
-        {selectedMemberIds.map((memberId) => (
-          <input type="hidden" name="member_ids" value={memberId} key={memberId} />
-        ))}
-        <label>
-          Betrag je Spieler
-          <input name="amount" inputMode="decimal" placeholder="leer = offen" disabled={disabled} />
-        </label>
+        <div className="bulk-payment-list quick-book-wide">
+          {selectedBalances.length ? (
+            selectedBalances.map((balance) => (
+              <label className="bulk-payment-row" key={balance.member_id}>
+                <input type="hidden" name="member_ids" value={balance.member_id} />
+                <span>
+                  <strong>{balance.display_name}</strong>
+                  <small>Offen: {formatMoney(balance.amount_due_cents, team?.currency)}</small>
+                </span>
+                <span className="bulk-payment-amount">
+                  <small>Zahlbetrag</small>
+                  <input
+                    name={`amount_${balance.member_id}`}
+                    inputMode="decimal"
+                    defaultValue={balance.amount_due_cents > 0 ? formatAmountForInput(balance.amount_due_cents) : ""}
+                    placeholder="0,00"
+                    aria-label={`Zahlbetrag fuer ${balance.display_name}`}
+                    disabled={disabled}
+                    required
+                  />
+                </span>
+              </label>
+            ))
+          ) : (
+            <p className="muted compact-message">Spieler ueber die Auswahlfelder markieren.</p>
+          )}
+        </div>
         <label>
           Datum
           <input name="booking_date" type="date" defaultValue={todayInputValue()} disabled={disabled} />
@@ -330,6 +348,7 @@ function PlayerDetail({
   balance,
   member,
   entries,
+  onClose,
   members,
   catalog,
   team,
@@ -338,6 +357,7 @@ function PlayerDetail({
   balance: MemberBalance | null;
   member: TeamMember | null;
   entries: LedgerEntry[];
+  onClose: () => void;
   members: TeamMember[];
   catalog: CatalogItem[];
   team: Team | null;
@@ -361,9 +381,14 @@ function PlayerDetail({
           <h3>{balance.display_name}</h3>
           <small>Saldo und letzte Buchungen</small>
         </span>
-        <strong className={balance.balance_cents > 0 ? "detail-balance due" : "detail-balance"}>
-          {formatMoney(balance.balance_cents, team?.currency)}
-        </strong>
+        <div className="player-detail-actions">
+          <strong className={balance.balance_cents > 0 ? "detail-balance due" : "detail-balance"}>
+            {formatMoney(balance.balance_cents, team?.currency)}
+          </strong>
+          <button className="icon-button player-detail-close" type="button" onClick={onClose} aria-label="Detailansicht schliessen">
+            <X size={18} />
+          </button>
+        </div>
       </div>
 
       <div className="player-detail-metrics">
@@ -576,3 +601,11 @@ function labelForType(type: LedgerEntry["type"]) {
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("de-DE").format(new Date(date));
 }
+
+function formatAmountForInput(cents: number) {
+  return (cents / 100).toLocaleString("de-DE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
