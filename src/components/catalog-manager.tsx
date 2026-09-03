@@ -1,5 +1,8 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { ArrowDown, ArrowUp, Beer, ClipboardList, Euro, ListOrdered, Pencil, Plus } from "lucide-react";
+import { ArrowDown, ArrowUp, Beer, ChevronDown, ClipboardList, Euro, ListOrdered, Pencil, Plus, Search } from "lucide-react";
 import { createCatalogItemAction, moveCatalogItemAction, sortCatalogItemsAction, updateCatalogItemAction } from "@/app/actions";
 import { DeleteCatalogItemButton } from "@/components/delete-catalog-item-button";
 import { formatMoney } from "@/lib/money";
@@ -14,8 +17,19 @@ export function CatalogManager({
   team: Team | null;
   disabled?: boolean;
 }) {
-  const fines = catalog.filter((item) => item.type === "fine");
-  const drinks = catalog.filter((item) => item.type === "drink");
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLocaleLowerCase("de-DE");
+  const filteredCatalog = useMemo(
+    () =>
+      catalog.filter((item) => {
+        if (!normalizedQuery) return true;
+        const searchableText = [item.name, item.description, item.in_kind_label].filter(Boolean).join(" ");
+        return searchableText.toLocaleLowerCase("de-DE").includes(normalizedQuery);
+      }),
+    [catalog, normalizedQuery]
+  );
+  const fines = filteredCatalog.filter((item) => item.type === "fine");
+  const drinks = filteredCatalog.filter((item) => item.type === "drink");
 
   return (
     <section className="admin-panel catalog-manager">
@@ -32,11 +46,14 @@ export function CatalogManager({
         <span>{catalog.length} Positionen</span>
       </div>
 
-      <div className="catalog-create-area">
-        <div className="subsection-heading">
-          <strong>Neue Position</strong>
-          <small>Art, Name und Preis festlegen</small>
-        </div>
+      <details className="catalog-create-area">
+        <summary className="catalog-create-summary">
+          <span className="subsection-heading">
+            <strong>Neue Position</strong>
+            <small>Art, Name und Preis festlegen</small>
+          </span>
+          <Plus size={18} />
+        </summary>
         <form action={createCatalogItemAction} className="form-grid catalog-form">
           <label>
             Art
@@ -66,6 +83,20 @@ export function CatalogManager({
             Hinzufuegen
           </button>
         </form>
+      </details>
+
+      <div className="catalog-toolbar">
+        <label className="catalog-search">
+          <Search size={17} />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Strafe oder Getraenk suchen"
+            aria-label="Katalog durchsuchen"
+          />
+        </label>
+        <small>{filteredCatalog.length} Treffer</small>
       </div>
 
       <div className="catalog-groups">
@@ -76,6 +107,7 @@ export function CatalogManager({
           team={team}
           icon={<ClipboardList size={18} />}
           disabled={disabled}
+          searching={Boolean(normalizedQuery)}
         />
         <CatalogList
           title="Getraenke"
@@ -84,6 +116,7 @@ export function CatalogManager({
           team={team}
           icon={<Beer size={18} />}
           disabled={disabled}
+          searching={Boolean(normalizedQuery)}
         />
       </div>
     </section>
@@ -96,7 +129,8 @@ function CatalogList({
   items,
   team,
   icon,
-  disabled
+  disabled,
+  searching
 }: {
   title: string;
   type: CatalogType;
@@ -104,83 +138,113 @@ function CatalogList({
   team: Team | null;
   icon: ReactNode;
   disabled: boolean;
+  searching: boolean;
 }) {
+  const [visibleCount, setVisibleCount] = useState(8);
+  const effectiveCount = searching ? Math.max(visibleCount, 12) : visibleCount;
+  const visibleItems = items.slice(0, effectiveCount);
+  const remainingCount = items.length - visibleItems.length;
+
   return (
-    <div className="catalog-group">
-      <div className="catalog-group-heading">
+    <details className="catalog-group" defaultOpen>
+      <summary className="catalog-group-heading">
         <span className="section-icon compact">{icon}</span>
         <h3>{title}</h3>
-        <div className="catalog-group-tools">
+        <span className="catalog-group-tools">
           <span className="catalog-count">{items.length}</span>
-          <CatalogSortButton type={type} sortBy="name" label={`${title} alphabetisch sortieren`} icon={<ListOrdered size={15} />} disabled={disabled} />
-          <CatalogSortButton type={type} sortBy="amount" label={`${title} nach Preis sortieren`} icon={<Euro size={15} />} disabled={disabled} />
-        </div>
+          <ChevronDown className="catalog-group-chevron" size={18} />
+        </span>
+      </summary>
+
+      <div className="catalog-list-tools">
+        <span>Sortieren</span>
+        <CatalogSortButton type={type} sortBy="name" label={`${title} alphabetisch sortieren`} icon={<ListOrdered size={15} />} disabled={disabled} />
+        <CatalogSortButton type={type} sortBy="amount" label={`${title} nach Preis sortieren`} icon={<Euro size={15} />} disabled={disabled} />
       </div>
-      {items.map((item, index) => (
-        <details className="catalog-row catalog-edit-row" key={item.id}>
-          <summary>
-            <span>
-              <strong>{item.name}</strong>
-              {item.description ? <small>{item.description}</small> : null}
-              {item.in_kind_label ? <small className="in-kind-catalog-label">+ {item.in_kind_label}</small> : null}
-            </span>
-            <div className="catalog-row-controls">
-              <strong>{formatMoney(item.amount_cents, team?.currency)}</strong>
-              <span className="catalog-move-actions">
-                <button className="icon-button catalog-order-button" type="button" title={`${item.name} bearbeiten`} aria-label={`${item.name} bearbeiten`} disabled={disabled}>
-                  <Pencil size={15} />
-                </button>
+
+      {visibleItems.map((item) => {
+        const index = items.findIndex((candidate) => candidate.id === item.id);
+
+        return (
+          <details className="catalog-row catalog-edit-row" key={item.id}>
+            <summary>
+              <span className="catalog-row-main">
+                <strong>{item.name}</strong>
+                {item.in_kind_label ? <small className="in-kind-catalog-label">+ {item.in_kind_label}</small> : null}
+              </span>
+              <span className="catalog-row-controls">
+                <strong>{formatMoney(item.amount_cents, team?.currency)}</strong>
+                <span className="catalog-edit-indicator">
+                  <Pencil size={14} />
+                  Bearbeiten
+                </span>
+              </span>
+            </summary>
+
+            <form action={updateCatalogItemAction} className="catalog-edit-form">
+              <input type="hidden" name="item_id" value={item.id} />
+              <label>
+                Art
+                <select name="type" defaultValue={item.type} disabled={disabled}>
+                  <option value="fine">Strafe</option>
+                  <option value="drink">Getraenk</option>
+                </select>
+              </label>
+              <label>
+                Name
+                <input name="name" defaultValue={item.name} disabled={disabled} required />
+              </label>
+              <label>
+                Betrag
+                <input name="amount" inputMode="decimal" defaultValue={formatAmountForInput(item.amount_cents)} disabled={disabled} required />
+              </label>
+              <label>
+                Sachleistung
+                <input name="in_kind_label" defaultValue={item.in_kind_label ?? ""} disabled={disabled} />
+              </label>
+              <label className="span-2">
+                Notiz
+                <input name="description" defaultValue={item.description ?? ""} disabled={disabled} />
+              </label>
+              <button className="primary-button catalog-save-button" type="submit" disabled={disabled}>
+                Speichern
+              </button>
+            </form>
+
+            <div className="catalog-edit-actions">
+              <span>Reihenfolge und Position</span>
+              <div className="catalog-move-actions">
                 <CatalogMoveButton
                   itemId={item.id}
                   direction="up"
                   label={`${item.name} nach oben`}
                   icon={<ArrowUp size={15} />}
-                  disabled={disabled || index === 0}
+                  disabled={disabled || (!searching && index === 0)}
                 />
                 <CatalogMoveButton
                   itemId={item.id}
                   direction="down"
                   label={`${item.name} nach unten`}
                   icon={<ArrowDown size={15} />}
-                  disabled={disabled || index === items.length - 1}
+                  disabled={disabled || (!searching && index === items.length - 1)}
                 />
                 <DeleteCatalogItemButton itemId={item.id} itemName={item.name} disabled={disabled} />
-              </span>
+              </div>
             </div>
-          </summary>
-          <form action={updateCatalogItemAction} className="catalog-edit-form">
-            <input type="hidden" name="item_id" value={item.id} />
-            <label>
-              Art
-              <select name="type" defaultValue={item.type} disabled={disabled}>
-                <option value="fine">Strafe</option>
-                <option value="drink">Getraenk</option>
-              </select>
-            </label>
-            <label>
-              Name
-              <input name="name" defaultValue={item.name} disabled={disabled} required />
-            </label>
-            <label>
-              Betrag
-              <input name="amount" inputMode="decimal" defaultValue={formatAmountForInput(item.amount_cents)} disabled={disabled} required />
-            </label>
-            <label>
-              Sachleistung
-              <input name="in_kind_label" defaultValue={item.in_kind_label ?? ""} disabled={disabled} />
-            </label>
-            <label className="span-2">
-              Notiz
-              <input name="description" defaultValue={item.description ?? ""} disabled={disabled} />
-            </label>
-            <button className="primary-button align-end" type="submit" disabled={disabled}>
-              Speichern
-            </button>
-          </form>
-        </details>
-      ))}
-      {!items.length ? <p className="muted catalog-empty">Noch keine Positionen vorhanden.</p> : null}
-    </div>
+          </details>
+        );
+      })}
+
+      {remainingCount > 0 ? (
+        <button className="ghost-button catalog-more-button" type="button" onClick={() => setVisibleCount((count) => count + 8)}>
+          <ChevronDown size={16} />
+          Weitere {Math.min(8, remainingCount)} anzeigen
+        </button>
+      ) : null}
+      {!items.length ? (
+        <p className="muted catalog-empty">{searching ? "Keine passenden Positionen gefunden." : "Noch keine Positionen vorhanden."}</p>
+      ) : null}
+    </details>
   );
 }
 
@@ -238,3 +302,4 @@ function formatAmountForInput(cents: number) {
     maximumFractionDigits: 2
   });
 }
+
