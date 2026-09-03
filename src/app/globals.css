@@ -962,11 +962,32 @@ select:focus {
 }
 
 .catalog-create-area {
-  display: grid;
-  grid-template-columns: 170px minmax(0, 1fr);
-  gap: 18px;
-  padding: 18px;
+  border-bottom: 1px solid var(--line);
   background: var(--panel-muted);
+}
+
+.catalog-create-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 54px;
+  padding: 10px 18px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.catalog-create-summary::-webkit-details-marker,
+.catalog-group-heading::-webkit-details-marker {
+  display: none;
+}
+
+.catalog-create-summary > svg {
+  color: var(--brand);
+}
+
+.catalog-create-area .catalog-form {
+  padding: 0 18px 18px;
 }
 
 .catalog-form {
@@ -979,9 +1000,41 @@ select:focus {
   margin: 0;
 }
 
+.catalog-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.catalog-toolbar > small {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.catalog-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.catalog-search > svg {
+  position: absolute;
+  left: 12px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.catalog-search input {
+  padding-left: 38px;
+}
+
 .catalog-group {
   min-width: 0;
-  padding: 18px;
+  padding: 0 18px 14px;
 }
 
 .catalog-group + .catalog-group {
@@ -993,7 +1046,10 @@ select:focus {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 10px;
-  padding-bottom: 14px;
+  min-height: 58px;
+  padding: 10px 0;
+  list-style: none;
+  cursor: pointer;
 }
 
 .catalog-group-heading h3 {
@@ -1023,6 +1079,33 @@ select:focus {
 .catalog-group-tools {
   justify-content: flex-end;
   gap: 6px;
+}
+
+.catalog-group-chevron {
+  color: var(--muted);
+  transition: transform 160ms ease;
+}
+
+.catalog-group[open] .catalog-group-chevron {
+  transform: rotate(180deg);
+}
+
+.catalog-list-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-height: 42px;
+  padding: 5px 0;
+  border-top: 1px solid var(--line);
+}
+
+.catalog-list-tools > span {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .catalog-row-controls {
@@ -1080,6 +1163,8 @@ select:focus {
   justify-content: space-between;
   gap: 14px;
   list-style: none;
+  min-height: 54px;
+  cursor: pointer;
 }
 
 .catalog-edit-row summary::-webkit-details-marker {
@@ -1093,6 +1178,64 @@ select:focus {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--line);
+}
+
+.catalog-row-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.catalog-row-main > strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalog-edit-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--panel-muted);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.catalog-edit-row[open] .catalog-edit-indicator {
+  border-color: var(--brand-border);
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+}
+
+.catalog-save-button {
+  align-self: end;
+}
+
+.catalog-edit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.catalog-edit-actions > span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.catalog-more-button {
+  width: 100%;
+  margin-top: 10px;
 }
 
 .catalog-row.large {
@@ -1241,6 +1384,64 @@ select:focus {
   display: inline-flex;
   align-items: center;
   gap: 7px;
+}
+
+.admin-bulk-payment {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-bulk-payment-add {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.admin-bulk-payment-form,
+.admin-bulk-payment-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-bulk-payment-list.has-players {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-bulk-payment-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 170px) 42px;
+  align-items: end;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-muted);
+}
+
+.admin-bulk-payment-row > span {
+  display: grid;
+  align-self: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.admin-bulk-payment-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-bulk-payment-row small {
+  color: var(--muted);
+}
+
+.admin-bulk-payment-meta {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) minmax(220px, 1fr) auto;
+  align-items: end;
+  gap: 10px;
 }
 
 .member-dashboard {
@@ -2249,18 +2450,19 @@ select:focus {
   }
 
   .player-filters {
-    margin: 0 -2px;
-    padding: 0 2px 3px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+    margin: 0;
+    padding: 0;
   }
 
   .player-filter-select {
-    flex-basis: 150px;
-    min-width: 150px;
+    min-width: 0;
   }
 
   .filter-chip {
-    min-height: 40px;
-    padding: 0 12px;
+    display: none;
   }
 
   .bulk-payment-actions,
@@ -2270,6 +2472,17 @@ select:focus {
 
   .bulk-payment-row {
     grid-template-columns: minmax(0, 1fr) minmax(108px, 132px);
+  }
+
+  .admin-bulk-payment-add,
+  .admin-bulk-payment-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-bulk-payment-row {
+    grid-template-columns: minmax(0, 1fr) minmax(104px, 128px) 42px;
+    gap: 8px;
+    padding: 8px;
   }
 
   .player-row {
@@ -2393,13 +2606,35 @@ select:focus {
     flex-direction: column;
   }
 
+  .catalog-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 10px 14px;
+  }
+
+  .catalog-toolbar > small {
+    display: none;
+  }
+
+  .catalog-create-summary {
+    padding: 8px 14px;
+  }
+
+  .catalog-create-area .catalog-form {
+    padding: 0 14px 14px;
+  }
+
+  .catalog-group {
+    padding: 0 14px 12px;
+  }
+
   .catalog-group-heading {
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    min-height: 52px;
   }
 
   .catalog-group-tools {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
+    justify-content: flex-end;
   }
 
   .catalog-row-controls {
@@ -2407,14 +2642,34 @@ select:focus {
     width: 100%;
   }
 
-  .catalog-edit-row summary,
   .catalog-edit-form {
     grid-template-columns: 1fr;
   }
 
   .catalog-edit-row summary {
-    align-items: flex-start;
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+    min-height: 50px;
+  }
+
+  .catalog-row-controls {
+    gap: 8px;
+    width: auto;
+  }
+
+  .catalog-edit-indicator {
+    min-height: 38px;
+  }
+
+  .catalog-edit-actions {
+    align-items: flex-end;
     flex-direction: column;
+  }
+
+  .catalog-move-actions {
+    justify-content: flex-end;
+    width: 100%;
   }
 
   .in-kind-item {
