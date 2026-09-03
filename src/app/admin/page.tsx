@@ -1,3 +1,4 @@
+import { AdminBulkPaymentForm } from "@/components/admin-bulk-payment-form";
 import { BookingForm } from "@/components/booking-form";
 import { CatalogManager } from "@/components/catalog-manager";
 import { ForbiddenState, LoginRequired, NoTeamState } from "@/components/empty-state";
@@ -32,6 +33,13 @@ export default async function AdminPage() {
       />
 
       <BookingForm members={data.members} catalog={data.catalog} team={data.team} disabled={data.isDemo} />
+      <AdminBulkPaymentForm
+        key={data.ledger.length}
+        balances={data.balances}
+        members={data.members}
+        team={data.team}
+        disabled={data.isDemo}
+      />
       <CatalogManager catalog={data.catalog} team={data.team} disabled={data.isDemo} />
       <MemberManager members={data.members} currentMemberId={data.currentMember.id} disabled={data.isDemo} />
       <LedgerTable
@@ -45,3 +53,4 @@ export default async function AdminPage() {
     </div>
   );
 }
+
