@@ -689,7 +689,6 @@ export async function createLedgerEntryAction(formData: FormData) {
 export async function createBulkPaymentAction(formData: FormData) {
   const { state, member: admin } = await requireAdmin();
   const memberIds = Array.from(new Set(formData.getAll("member_ids").map(String).filter(Boolean)));
-  const fixedAmountCents = Math.abs(parseEuroToCents(formData.get("amount")));
   const bookingDate = String(formData.get("booking_date") ?? "").trim() || new Date().toISOString().slice(0, 10);
   const description = String(formData.get("description") ?? "").trim() || "Sammelzahlung erhalten";
   const now = new Date().toISOString();
@@ -699,16 +698,15 @@ export async function createBulkPaymentAction(formData: FormData) {
   }
 
   const membersById = new Map(state.members.map((member) => [member.id, member]));
-  const openAmountByMember = calculateOpenAmountByMember(state.ledger);
   const newEntries: LedgerEntry[] = [];
 
   for (const memberId of memberIds) {
     const bookedMember = membersById.get(memberId);
-    if (!bookedMember || bookedMember.team_id !== state.team.id || !bookedMember.active) {
+    if (!bookedMember || bookedMember.team_id !== state.team.id || !bookedMember.active || bookedMember.role !== "player") {
       throw new Error("Ein ausgewaehlter Spieler wurde nicht gefunden.");
     }
 
-    const amountCents = fixedAmountCents || Math.max(0, openAmountByMember.get(memberId) ?? 0);
+    const amountCents = Math.abs(parseEuroToCents(formData.get(`amount_${memberId}`)));
     if (amountCents <= 0) {
       continue;
     }
@@ -750,7 +748,7 @@ export async function createBulkPaymentAction(formData: FormData) {
   }
 
   if (!newEntries.length) {
-    throw new Error("Fuer die Auswahl gibt es keinen offenen Betrag oder keinen Zahlungsbetrag.");
+    throw new Error("Bitte fuer mindestens einen Spieler einen Zahlungsbetrag eingeben.");
   }
 
   state.ledger.unshift(...newEntries);
@@ -1077,20 +1075,6 @@ function isEditableLedgerType(type: LedgerType) {
   return type === "fine" || type === "drink" || type === "payment" || type === "adjustment";
 }
 
-function calculateOpenAmountByMember(ledger: LedgerEntry[]) {
-  const result = new Map<string, number>();
-
-  for (const entry of ledger) {
-    if (entry.status === "voided") {
-      continue;
-    }
-
-    result.set(entry.member_id, (result.get(entry.member_id) ?? 0) + entry.total_amount_cents);
-  }
-
-  return result;
-}
-
 function normalizeTreasuryEntryType(value: FormDataEntryValue | null): TreasuryEntryType {
   if (value === "balance" || value === "income") {
     return value;
@@ -1145,3 +1129,4 @@ function revalidateAll() {
   revalidatePath("/login");
   refresh();
 }
+
