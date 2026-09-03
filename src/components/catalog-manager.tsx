@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { ArrowDown, ArrowUp, Beer, ClipboardList, Euro, ListOrdered, Plus } from "lucide-react";
-import { createCatalogItemAction, moveCatalogItemAction, sortCatalogItemsAction } from "@/app/actions";
+import { ArrowDown, ArrowUp, Beer, ClipboardList, Euro, ListOrdered, Pencil, Plus } from "lucide-react";
+import { createCatalogItemAction, moveCatalogItemAction, sortCatalogItemsAction, updateCatalogItemAction } from "@/app/actions";
 import { DeleteCatalogItemButton } from "@/components/delete-catalog-item-button";
 import { formatMoney } from "@/lib/money";
 import type { CatalogItem, CatalogType, Team } from "@/lib/types";
@@ -117,33 +117,67 @@ function CatalogList({
         </div>
       </div>
       {items.map((item, index) => (
-        <div className="catalog-row" key={item.id}>
-          <span>
-            <strong>{item.name}</strong>
-            {item.description ? <small>{item.description}</small> : null}
-            {item.in_kind_label ? <small className="in-kind-catalog-label">+ {item.in_kind_label}</small> : null}
-          </span>
-          <div className="catalog-row-controls">
-            <strong>{formatMoney(item.amount_cents, team?.currency)}</strong>
-            <span className="catalog-move-actions">
-              <CatalogMoveButton
-                itemId={item.id}
-                direction="up"
-                label={`${item.name} nach oben`}
-                icon={<ArrowUp size={15} />}
-                disabled={disabled || index === 0}
-              />
-              <CatalogMoveButton
-                itemId={item.id}
-                direction="down"
-                label={`${item.name} nach unten`}
-                icon={<ArrowDown size={15} />}
-                disabled={disabled || index === items.length - 1}
-              />
-              <DeleteCatalogItemButton itemId={item.id} itemName={item.name} disabled={disabled} />
+        <details className="catalog-row catalog-edit-row" key={item.id}>
+          <summary>
+            <span>
+              <strong>{item.name}</strong>
+              {item.description ? <small>{item.description}</small> : null}
+              {item.in_kind_label ? <small className="in-kind-catalog-label">+ {item.in_kind_label}</small> : null}
             </span>
-          </div>
-        </div>
+            <div className="catalog-row-controls">
+              <strong>{formatMoney(item.amount_cents, team?.currency)}</strong>
+              <span className="catalog-move-actions">
+                <button className="icon-button catalog-order-button" type="button" title={`${item.name} bearbeiten`} aria-label={`${item.name} bearbeiten`} disabled={disabled}>
+                  <Pencil size={15} />
+                </button>
+                <CatalogMoveButton
+                  itemId={item.id}
+                  direction="up"
+                  label={`${item.name} nach oben`}
+                  icon={<ArrowUp size={15} />}
+                  disabled={disabled || index === 0}
+                />
+                <CatalogMoveButton
+                  itemId={item.id}
+                  direction="down"
+                  label={`${item.name} nach unten`}
+                  icon={<ArrowDown size={15} />}
+                  disabled={disabled || index === items.length - 1}
+                />
+                <DeleteCatalogItemButton itemId={item.id} itemName={item.name} disabled={disabled} />
+              </span>
+            </div>
+          </summary>
+          <form action={updateCatalogItemAction} className="catalog-edit-form">
+            <input type="hidden" name="item_id" value={item.id} />
+            <label>
+              Art
+              <select name="type" defaultValue={item.type} disabled={disabled}>
+                <option value="fine">Strafe</option>
+                <option value="drink">Getraenk</option>
+              </select>
+            </label>
+            <label>
+              Name
+              <input name="name" defaultValue={item.name} disabled={disabled} required />
+            </label>
+            <label>
+              Betrag
+              <input name="amount" inputMode="decimal" defaultValue={formatAmountForInput(item.amount_cents)} disabled={disabled} required />
+            </label>
+            <label>
+              Sachleistung
+              <input name="in_kind_label" defaultValue={item.in_kind_label ?? ""} disabled={disabled} />
+            </label>
+            <label className="span-2">
+              Notiz
+              <input name="description" defaultValue={item.description ?? ""} disabled={disabled} />
+            </label>
+            <button className="primary-button align-end" type="submit" disabled={disabled}>
+              Speichern
+            </button>
+          </form>
+        </details>
       ))}
       {!items.length ? <p className="muted catalog-empty">Noch keine Positionen vorhanden.</p> : null}
     </div>
@@ -196,4 +230,11 @@ function CatalogSortButton({
       </button>
     </form>
   );
+}
+
+function formatAmountForInput(cents: number) {
+  return (cents / 100).toLocaleString("de-DE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Banknote, Beer, ChevronDown, ClipboardList, Plus, Search, X } from "lucide-react";
-import { createLedgerEntryAction } from "@/app/actions";
+import type { Dispatch, SetStateAction } from "react";
+import { Banknote, Beer, ChevronDown, ClipboardList, Plus, Search, Users, X } from "lucide-react";
+import { createBulkPaymentAction, createLedgerEntryAction } from "@/app/actions";
 import { LedgerEntryMenu } from "@/components/ledger-entry-menu";
 import { StatusPill } from "@/components/status-pill";
 import { formatMoney, todayInputValue } from "@/lib/money";
@@ -28,6 +29,7 @@ export function MemberDashboard({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<PlayerFilter>("all");
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [paymentMemberIds, setPaymentMemberIds] = useState<string[]>([]);
   const [showSettled, setShowSettled] = useState(false);
 
   const ledgerByMember = useMemo(() => groupLedgerByMember(ledger), [ledger]);
@@ -94,6 +96,16 @@ export function MemberDashboard({
           />
         </label>
         <div className="player-filters" aria-label="Spieler filtern">
+          <label className="player-filter-select">
+            Filter
+            <select value={filter} onChange={(event) => setFilter(event.target.value as PlayerFilter)}>
+              {playerFilters.map((item) => (
+                <option value={item.value} key={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
           {playerFilters.map((item) => (
             <button
               className={filter === item.value ? "filter-chip active" : "filter-chip"}
@@ -109,11 +121,21 @@ export function MemberDashboard({
 
       <div className="player-dashboard-grid">
         <div className="player-list-panel">
+          <BulkPaymentPanel
+            balances={balances}
+            selectedMemberIds={paymentMemberIds}
+            setSelectedMemberIds={setPaymentMemberIds}
+            team={team}
+            disabled={disabled}
+          />
+
           <PlayerRows
             balances={openBalances}
             ledgerByMember={ledgerByMember}
             selectedMemberId={selectedMemberId}
             onSelect={setSelectedMemberId}
+            paymentMemberIds={paymentMemberIds}
+            onTogglePayment={(memberId) => togglePaymentMember(memberId, setPaymentMemberIds)}
             members={members}
             catalog={catalog}
             team={team}
@@ -135,6 +157,8 @@ export function MemberDashboard({
                   ledgerByMember={ledgerByMember}
                   selectedMemberId={selectedMemberId}
                   onSelect={setSelectedMemberId}
+                  paymentMemberIds={paymentMemberIds}
+                  onTogglePayment={(memberId) => togglePaymentMember(memberId, setPaymentMemberIds)}
                   members={members}
                   catalog={catalog}
                   team={team}
@@ -157,6 +181,7 @@ export function MemberDashboard({
           balance={selectedBalance}
           member={selectedMember}
           entries={selectedEntries}
+          onClose={() => setSelectedMemberId(null)}
           members={members}
           catalog={catalog}
           team={team}
@@ -172,6 +197,8 @@ function PlayerRows({
   ledgerByMember,
   selectedMemberId,
   onSelect,
+  paymentMemberIds,
+  onTogglePayment,
   members,
   catalog,
   team,
@@ -182,6 +209,8 @@ function PlayerRows({
   ledgerByMember: Map<string, LedgerEntry[]>;
   selectedMemberId: string | null;
   onSelect: (memberId: string) => void;
+  paymentMemberIds: string[];
+  onTogglePayment: (memberId: string) => void;
   members: TeamMember[];
   catalog: CatalogItem[];
   team: Team | null;
@@ -196,6 +225,15 @@ function PlayerRows({
 
         return (
           <article className={selectedMemberId === balance.member_id ? "player-row selected" : "player-row"} key={balance.member_id}>
+            <label className="payment-select" title={`${balance.display_name} fuer Sammelzahlung auswaehlen`}>
+              <input
+                type="checkbox"
+                checked={paymentMemberIds.includes(balance.member_id)}
+                onChange={() => onTogglePayment(balance.member_id)}
+                aria-label={`${balance.display_name} fuer Sammelzahlung auswaehlen`}
+                disabled={disabled}
+              />
+            </label>
             <button className="player-row-main" type="button" onClick={() => onSelect(balance.member_id)}>
               <span>
                 <strong>{balance.display_name}</strong>
@@ -215,10 +253,102 @@ function PlayerRows({
   );
 }
 
+function BulkPaymentPanel({
+  balances,
+  selectedMemberIds,
+  setSelectedMemberIds,
+  team,
+  disabled
+}: {
+  balances: MemberBalance[];
+  selectedMemberIds: string[];
+  setSelectedMemberIds: Dispatch<SetStateAction<string[]>>;
+  team: Team | null;
+  disabled: boolean;
+}) {
+  const openBalances = balances.filter((balance) => balance.amount_due_cents > 0);
+  const selectedBalances = balances.filter((balance) => selectedMemberIds.includes(balance.member_id));
+  const selectedOpenTotal = selectedBalances.reduce((sum, balance) => sum + Math.max(0, balance.amount_due_cents), 0);
+
+  return (
+    <details className="bulk-payment-panel">
+      <summary>
+        <span>
+          <Users size={17} />
+          <strong>Sammelzahlung</strong>
+        </span>
+        <small>
+          {selectedMemberIds.length} Spieler | {formatMoney(selectedOpenTotal, team?.currency)}
+        </small>
+      </summary>
+      <div className="bulk-payment-actions">
+        <button
+          className="ghost-button compact-button"
+          type="button"
+          onClick={() => setSelectedMemberIds(openBalances.map((balance) => balance.member_id))}
+          disabled={disabled || !openBalances.length}
+        >
+          Offene auswaehlen
+        </button>
+        <button
+          className="ghost-button compact-button"
+          type="button"
+          onClick={() => setSelectedMemberIds([])}
+          disabled={disabled || !selectedMemberIds.length}
+        >
+          Auswahl leeren
+        </button>
+      </div>
+      <form action={createBulkPaymentAction} className="bulk-payment-form">
+        <div className="bulk-payment-list quick-book-wide">
+          {selectedBalances.length ? (
+            selectedBalances.map((balance) => (
+              <label className="bulk-payment-row" key={balance.member_id}>
+                <input type="hidden" name="member_ids" value={balance.member_id} />
+                <span>
+                  <strong>{balance.display_name}</strong>
+                  <small>Offen: {formatMoney(balance.amount_due_cents, team?.currency)}</small>
+                </span>
+                <span className="bulk-payment-amount">
+                  <small>Zahlbetrag</small>
+                  <input
+                    name={`amount_${balance.member_id}`}
+                    inputMode="decimal"
+                    defaultValue={balance.amount_due_cents > 0 ? formatAmountForInput(balance.amount_due_cents) : ""}
+                    placeholder="0,00"
+                    aria-label={`Zahlbetrag fuer ${balance.display_name}`}
+                    disabled={disabled}
+                    required
+                  />
+                </span>
+              </label>
+            ))
+          ) : (
+            <p className="muted compact-message">Spieler ueber die Auswahlfelder markieren.</p>
+          )}
+        </div>
+        <label>
+          Datum
+          <input name="booking_date" type="date" defaultValue={todayInputValue()} disabled={disabled} />
+        </label>
+        <label className="quick-book-wide">
+          Buchungsgrund
+          <input name="description" placeholder="Sammelzahlung erhalten" disabled={disabled} />
+        </label>
+        <button className="primary-button quick-book-wide" type="submit" disabled={disabled || !selectedMemberIds.length}>
+          <Banknote size={16} />
+          Zahlungen buchen
+        </button>
+      </form>
+    </details>
+  );
+}
+
 function PlayerDetail({
   balance,
   member,
   entries,
+  onClose,
   members,
   catalog,
   team,
@@ -227,6 +357,7 @@ function PlayerDetail({
   balance: MemberBalance | null;
   member: TeamMember | null;
   entries: LedgerEntry[];
+  onClose: () => void;
   members: TeamMember[];
   catalog: CatalogItem[];
   team: Team | null;
@@ -250,9 +381,14 @@ function PlayerDetail({
           <h3>{balance.display_name}</h3>
           <small>Saldo und letzte Buchungen</small>
         </span>
-        <strong className={balance.balance_cents > 0 ? "detail-balance due" : "detail-balance"}>
-          {formatMoney(balance.balance_cents, team?.currency)}
-        </strong>
+        <div className="player-detail-actions">
+          <strong className={balance.balance_cents > 0 ? "detail-balance due" : "detail-balance"}>
+            {formatMoney(balance.balance_cents, team?.currency)}
+          </strong>
+          <button className="icon-button player-detail-close" type="button" onClick={onClose} aria-label="Detailansicht schliessen">
+            <X size={18} />
+          </button>
+        </div>
       </div>
 
       <div className="player-detail-metrics">
@@ -447,6 +583,12 @@ function sortBalances(left: MemberBalance, right: MemberBalance) {
   );
 }
 
+function togglePaymentMember(memberId: string, setPaymentMemberIds: Dispatch<SetStateAction<string[]>>) {
+  setPaymentMemberIds((memberIds) =>
+    memberIds.includes(memberId) ? memberIds.filter((selectedId) => selectedId !== memberId) : [...memberIds, memberId]
+  );
+}
+
 function labelForType(type: LedgerEntry["type"]) {
   if (type === "fine") return "Strafe";
   if (type === "drink") return "Getraenk";
@@ -459,3 +601,11 @@ function labelForType(type: LedgerEntry["type"]) {
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("de-DE").format(new Date(date));
 }
+
+function formatAmountForInput(cents: number) {
+  return (cents / 100).toLocaleString("de-DE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
