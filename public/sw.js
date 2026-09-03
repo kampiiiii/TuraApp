@@ -1,4 +1,4 @@
-const CACHE_NAME = "tura-shell-v7";
+const CACHE_NAME = "tura-shell-v8";
 const APP_SHELL = ["/offline", "/manifest.webmanifest", "/icons/tura-icon-v2.svg"];
 const STATIC_DESTINATIONS = new Set(["font", "image", "script", "style"]);
 
@@ -9,11 +9,14 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
+    caches.keys().then(async (keys) => {
+      await Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
+      await self.clients.claim();
+
+      const clients = await self.clients.matchAll({ type: "window" });
+      await Promise.all(clients.map((client) => client.navigate(client.url).catch(() => undefined)));
+    })
   );
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
