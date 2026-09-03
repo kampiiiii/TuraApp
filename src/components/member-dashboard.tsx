@@ -10,6 +10,7 @@ import { formatMoney, todayInputValue } from "@/lib/money";
 import type { CatalogItem, LedgerEntry, MemberBalance, Team, TeamMember } from "@/lib/types";
 
 type PlayerFilter = "all" | "open" | "fine" | "drink" | "paid";
+type PlayerSort = "due-desc" | "due-asc" | "name-asc" | "name-desc" | "recent";
 
 export function MemberDashboard({
   balances,
@@ -28,6 +29,7 @@ export function MemberDashboard({
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<PlayerFilter>("all");
+  const [sort, setSort] = useState<PlayerSort>("due-desc");
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [paymentMemberIds, setPaymentMemberIds] = useState<string[]>([]);
   const [showSettled, setShowSettled] = useState(false);
@@ -55,8 +57,8 @@ export function MemberDashboard({
 
         return true;
       })
-      .sort(sortBalances);
-  }, [balances, filter, ledgerByMember, query]);
+      .sort((left, right) => sortBalances(left, right, sort, ledgerByMember));
+  }, [balances, filter, ledgerByMember, query, sort]);
 
   const openBalances = filteredBalances.filter((balance) => balance.amount_due_cents > 0);
   const settledBalances = filteredBalances.filter((balance) => balance.amount_due_cents <= 0);
@@ -100,6 +102,16 @@ export function MemberDashboard({
             Filter
             <select value={filter} onChange={(event) => setFilter(event.target.value as PlayerFilter)}>
               {playerFilters.map((item) => (
+                <option value={item.value} key={item.value}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="player-filter-select player-sort-select">
+            Sortierung
+            <select value={sort} onChange={(event) => setSort(event.target.value as PlayerSort)}>
+              {playerSorts.map((item) => (
                 <option value={item.value} key={item.value}>
                   {item.label}
                 </option>
@@ -268,8 +280,6 @@ function BulkPaymentPanel({
 }) {
   const openBalances = balances.filter((balance) => balance.amount_due_cents > 0);
   const selectedBalances = balances.filter((balance) => selectedMemberIds.includes(balance.member_id));
-  const selectedOpenTotal = selectedBalances.reduce((sum, balance) => sum + Math.max(0, balance.amount_due_cents), 0);
-
   return (
     <details className="bulk-payment-panel">
       <summary>
@@ -277,9 +287,7 @@ function BulkPaymentPanel({
           <Users size={17} />
           <strong>Sammelzahlung</strong>
         </span>
-        <small>
-          {selectedMemberIds.length} Spieler | {formatMoney(selectedOpenTotal, team?.currency)}
-        </small>
+        <small>{selectedMemberIds.length} Spieler ausgewaehlt</small>
       </summary>
       <div className="bulk-payment-actions">
         <button
@@ -314,7 +322,6 @@ function BulkPaymentPanel({
                   <input
                     name={`amount_${balance.member_id}`}
                     inputMode="decimal"
-                    defaultValue={balance.amount_due_cents > 0 ? formatAmountForInput(balance.amount_due_cents) : ""}
                     placeholder="0,00"
                     aria-label={`Zahlbetrag fuer ${balance.display_name}`}
                     disabled={disabled}
@@ -557,6 +564,14 @@ const playerFilters: { value: PlayerFilter; label: string }[] = [
   { value: "paid", label: "Bezahlt" }
 ];
 
+const playerSorts: { value: PlayerSort; label: string }[] = [
+  { value: "due-desc", label: "Offen: hoechster zuerst" },
+  { value: "due-asc", label: "Offen: niedrigster zuerst" },
+  { value: "name-asc", label: "Name A-Z" },
+  { value: "name-desc", label: "Name Z-A" },
+  { value: "recent", label: "Zuletzt gebucht" }
+];
+
 type QuickBookingType = "fine" | "drink" | "payment";
 
 function groupLedgerByMember(ledger: LedgerEntry[]) {
@@ -575,12 +590,26 @@ function groupLedgerByMember(ledger: LedgerEntry[]) {
   return result;
 }
 
-function sortBalances(left: MemberBalance, right: MemberBalance) {
-  return (
-    Number(right.amount_due_cents > 0) - Number(left.amount_due_cents > 0) ||
-    right.amount_due_cents - left.amount_due_cents ||
-    left.display_name.localeCompare(right.display_name, "de", { sensitivity: "base" })
-  );
+function sortBalances(
+  left: MemberBalance,
+  right: MemberBalance,
+  sort: PlayerSort,
+  ledgerByMember: Map<string, LedgerEntry[]>
+) {
+  const openOrder = Number(right.amount_due_cents > 0) - Number(left.amount_due_cents > 0);
+  const nameOrder = left.display_name.localeCompare(right.display_name, "de", { sensitivity: "base" });
+
+  if (openOrder) return openOrder;
+  if (sort === "due-asc") return left.amount_due_cents - right.amount_due_cents || nameOrder;
+  if (sort === "name-asc") return nameOrder;
+  if (sort === "name-desc") return -nameOrder;
+  if (sort === "recent") {
+    const leftDate = ledgerByMember.get(left.member_id)?.[0]?.created_at ?? "";
+    const rightDate = ledgerByMember.get(right.member_id)?.[0]?.created_at ?? "";
+    return rightDate.localeCompare(leftDate) || nameOrder;
+  }
+
+  return right.amount_due_cents - left.amount_due_cents || nameOrder;
 }
 
 function togglePaymentMember(memberId: string, setPaymentMemberIds: Dispatch<SetStateAction<string[]>>) {
@@ -600,12 +629,5 @@ function labelForType(type: LedgerEntry["type"]) {
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("de-DE").format(new Date(date));
-}
-
-function formatAmountForInput(cents: number) {
-  return (cents / 100).toLocaleString("de-DE", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
 }
 
