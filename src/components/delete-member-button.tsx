@@ -12,21 +12,23 @@ export function DeleteMemberButton({
   memberName: string;
   disabled?: boolean;
 }) {
+  const label = `${memberName} löschen`;
+
   return (
     <form
       action={deleteMemberAction}
+      className="member-delete-form"
       onSubmit={(event) => {
         const confirmed = window.confirm(
-          `${memberName} wirklich loeschen? Der Zugang wird entfernt. Vorhandene Buchungen bleiben in der Historie.`
+          `${memberName} wirklich löschen? Der Zugang wird entfernt. Vorhandene Buchungen bleiben in der Historie.`
         );
         if (!confirmed) event.preventDefault();
       }}
     >
       <input type="hidden" name="member_id" value={memberId} />
       <input type="hidden" name="confirm_delete" value="delete-member" />
-      <button className="ghost-button member-delete-button" type="submit" disabled={disabled}>
+      <button className="icon-button danger member-delete-button" type="submit" title={label} aria-label={label} disabled={disabled}>
         <Trash2 size={16} />
-        Loeschen
       </button>
     </form>
   );

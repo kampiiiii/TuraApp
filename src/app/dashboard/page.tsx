@@ -35,7 +35,7 @@ export default async function DashboardPage() {
         title={isAdmin ? "Mannschaftskasse" : `Hallo ${data.currentMember?.display_name ?? ""}`}
         description={
           isAdmin
-            ? "Ueberblick ueber offene Strafen, Getraenke und Zahlungen der Mannschaft."
+            ? "Überblick über offene Strafen, Getränke und Zahlungen der Mannschaft."
             : "Deine eigenen offenen Buchungen, Zahlungen und dein aktueller Saldo."
         }
       />
@@ -55,7 +55,7 @@ export default async function DashboardPage() {
             <small>
               {currentBalance.credit_cents > 0
                 ? "Das Guthaben wird automatisch mit neuen Buchungen verrechnet."
-                : "Zahlungen werden automatisch mit den aeltesten offenen Buchungen verrechnet."}
+                : "Zahlungen werden automatisch mit den ältesten offenen Buchungen verrechnet."}
             </small>
           </span>
           <strong>
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
             <ReceiptText size={22} />
             <span>
               <strong>Neue Buchung</strong>
-              <small>Spieler waehlen, Katalogposition klicken, speichern.</small>
+              <small>Spieler wählen, Katalogposition klicken, speichern.</small>
             </span>
             <ArrowRight size={18} />
           </Link>

@@ -5,7 +5,7 @@ export function MemberBalanceTable({ balances, team }: { balances: MemberBalance
   return (
     <section className="table-section">
       <div className="section-title-row">
-        <h2>Mitgliederuebersicht</h2>
+        <h2>Mitgliederübersicht</h2>
         <span>{balances.length} Konten</span>
       </div>
       <div className="table-wrap">
@@ -14,8 +14,8 @@ export function MemberBalanceTable({ balances, team }: { balances: MemberBalance
             <tr>
               <th>Spieler</th>
               <th>Strafen</th>
-              <th>Getraenke</th>
-              <th>Beitraege</th>
+              <th>Getränke</th>
+              <th>Beiträge</th>
               <th>Bezahlt</th>
               <th>Offen</th>
               <th>Guthaben</th>
@@ -28,8 +28,8 @@ export function MemberBalanceTable({ balances, team }: { balances: MemberBalance
                   {balance.display_name}
                 </td>
                 <td data-label="Strafen">{formatMoney(balance.fine_cents, team?.currency)}</td>
-                <td data-label="Getraenke">{formatMoney(balance.drink_cents, team?.currency)}</td>
-                <td data-label="Beitraege">
+                <td data-label="Getränke">{formatMoney(balance.drink_cents, team?.currency)}</td>
+                <td data-label="Beiträge">
                   {formatMoney(balance.fee_cents + balance.interest_cents, team?.currency)}
                 </td>
                 <td data-label="Bezahlt">{formatMoney(balance.payment_cents, team?.currency)}</td>
