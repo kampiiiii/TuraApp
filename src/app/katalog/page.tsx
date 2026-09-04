@@ -20,11 +20,10 @@ export default async function CatalogPage() {
     <div className="page-stack">
       <PageHeader
         eyebrow="Katalog"
-        title="Strafen und Getraenke"
-        description="Der Katalog ist die Klickliste fuer den Kassenwart und die Preisliste fuer Spieler."
+        title="Strafen und Getränke"
+        description="Der Katalog ist die Klickliste für den Kassenwart und die Preisliste für Spieler."
       />
       <CatalogBrowser catalog={data.catalog} currency={data.team?.currency} />
     </div>
   );
 }
-

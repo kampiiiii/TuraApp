@@ -29,7 +29,7 @@ export default async function AdminPage() {
       <PageHeader
         eyebrow="Admin"
         title="Kassenwart-Zentrale"
-        description="Spieler, Katalog und Buchungen an einem Ort. Nur angemeldete Admins koennen hier speichern."
+        description="Spieler, Katalog und Buchungen an einem Ort. Nur angemeldete Admins können hier speichern."
       />
 
       <BookingForm members={data.members} catalog={data.catalog} team={data.team} disabled={data.isDemo} />
@@ -53,4 +53,3 @@ export default async function AdminPage() {
     </div>
   );
 }
-

@@ -24,8 +24,8 @@ export function BalanceCards({
   return (
     <section className="metric-grid" aria-label="Salden">
       <Metric label="Strafen" value={formatMoney(totalFine, currency)} icon={<ClipboardList size={20} />} />
-      <Metric label="Getraenke" value={formatMoney(totalDrinks, currency)} icon={<Beer size={20} />} />
-      <Metric label="Beitraege" value={formatMoney(totalFees, currency)} icon={<CalendarClock size={20} />} />
+      <Metric label="Getränke" value={formatMoney(totalDrinks, currency)} icon={<Beer size={20} />} />
+      <Metric label="Beiträge" value={formatMoney(totalFees, currency)} icon={<CalendarClock size={20} />} />
       <Metric label="Bezahlt" value={formatMoney(totalPayments, currency)} icon={<Banknote size={20} />} />
       <Metric label="Offen" value={formatMoney(totalDue, currency)} icon={<CircleDollarSign size={20} />} strong={totalDue > 0} />
       <Metric label="Guthaben" value={formatMoney(totalCredit, currency)} icon={<WalletCards size={20} />} strong={totalCredit > 0} />

@@ -23,14 +23,14 @@ export function BookingForm({
     <section className="admin-panel">
       <div className="section-title-row">
         <h2>Buchung erfassen</h2>
-        <span>Strafe, Getraenk oder Zahlung</span>
+        <span>Strafe, Getränk oder Zahlung</span>
       </div>
 
       <form action={createLedgerEntryAction} className="booking-grid">
         <label>
           Spieler
           <select name="member_id" disabled={disabled} required>
-            <option value="">Auswaehlen</option>
+            <option value="">Auswählen</option>
             {players.map((member) => (
               <option value={member.id} key={member.id}>
                 {member.display_name}
@@ -43,7 +43,7 @@ export function BookingForm({
           Art
           <select name="type" defaultValue="fine" disabled={disabled}>
             <option value="fine">Strafe</option>
-            <option value="drink">Getraenk</option>
+            <option value="drink">Getränk</option>
             <option value="payment">Zahlung</option>
             <option value="adjustment">Anpassung</option>
           </select>
@@ -61,7 +61,7 @@ export function BookingForm({
                 </option>
               ))}
             </optgroup>
-            <optgroup label="Getraenke">
+            <optgroup label="Getränke">
               {drinks.map((item) => (
                 <option value={item.id} key={item.id}>
                   {item.name} ({formatMoney(item.amount_cents, team?.currency)})
@@ -88,7 +88,7 @@ export function BookingForm({
 
         <label className="span-2">
           Beschreibung
-          <input name="description" placeholder="Optional bei Katalog, Pflicht fuer freie Buchung sinnvoll" disabled={disabled} />
+          <input name="description" placeholder="Optional bei Katalog, Pflicht für freie Buchung sinnvoll" disabled={disabled} />
         </label>
 
         <label className="span-2">
@@ -104,4 +104,3 @@ export function BookingForm({
     </section>
   );
 }
-

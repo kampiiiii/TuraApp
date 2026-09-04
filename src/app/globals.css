@@ -542,6 +542,38 @@ select:disabled {
   border-bottom: 1px solid var(--line);
 }
 
+.treasury-book-heading > span {
+  display: grid;
+  gap: 2px;
+}
+
+.treasury-book-heading small {
+  color: var(--muted);
+}
+
+.treasury-period-filter {
+  display: flex;
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 230px;
+}
+
+.treasury-period-filter > svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.treasury-period-filter select {
+  min-height: 38px;
+}
+
+.treasury-period-empty {
+  margin: 0;
+  padding: 24px 18px;
+  color: var(--muted);
+}
+
 .table-wrap {
   overflow-x: auto;
 }
@@ -874,7 +906,9 @@ select:focus {
 }
 
 .member-list {
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 8px;
+  margin-top: 14px;
 }
 
 .member-chip,
@@ -886,15 +920,23 @@ select:focus {
 
 .member-chip {
   display: grid;
-  gap: 12px;
-  padding: 14px;
+  gap: 8px;
+  padding: 10px;
 }
 
 .member-heading {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
+  min-width: 0;
+}
+
+.member-heading > span {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .member-heading small {
@@ -904,20 +946,28 @@ select:focus {
 
 .member-role-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 42px;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  gap: 6px;
 }
 
 .pin-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 72px;
-  gap: 8px;
-  margin-top: 8px;
+  grid-template-columns: minmax(0, 1fr) 54px;
+  gap: 6px;
+  margin: 0;
 }
 
 .member-pin-block {
   display: grid;
-  gap: 7px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.member-compact-controls {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.9fr) minmax(150px, 1.1fr) 38px;
+  align-items: start;
+  gap: 8px;
 }
 
 .member-pin-hint {
@@ -956,8 +1006,12 @@ select:focus {
 
 .member-delete-button {
   justify-content: center;
-  width: 100%;
+  width: 38px;
   color: var(--danger);
+}
+
+.member-delete-form {
+  margin: 0;
 }
 
 .member-delete-button:hover {
@@ -986,7 +1040,7 @@ select:focus {
 
 .catalog-manager > .section-title-row {
   margin: 0;
-  padding: 18px;
+  padding: 14px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -1000,8 +1054,8 @@ select:focus {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 54px;
-  padding: 10px 18px;
+  min-height: 48px;
+  padding: 8px 14px;
   list-style: none;
   cursor: pointer;
 }
@@ -1016,7 +1070,7 @@ select:focus {
 }
 
 .catalog-create-area .catalog-form {
-  padding: 0 18px 18px;
+  padding: 0 14px 14px;
 }
 
 .catalog-form {
@@ -1033,7 +1087,7 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 18px;
+  padding: 9px 14px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -1063,7 +1117,7 @@ select:focus {
 
 .catalog-group {
   min-width: 0;
-  padding: 0 18px 14px;
+  padding: 0 14px 10px;
 }
 
 .catalog-group + .catalog-group {
@@ -1075,8 +1129,8 @@ select:focus {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 10px;
-  min-height: 58px;
-  padding: 10px 0;
+  min-height: 50px;
+  padding: 7px 0;
   list-style: none;
   cursor: pointer;
 }
@@ -1124,8 +1178,8 @@ select:focus {
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
-  min-height: 42px;
-  padding: 5px 0;
+  min-height: 36px;
+  padding: 3px 0;
   border-top: 1px solid var(--line);
 }
 
@@ -1139,7 +1193,11 @@ select:focus {
 
 .catalog-row-controls {
   flex: 0 0 auto;
-  gap: 12px;
+  gap: 8px;
+}
+
+.catalog-row-controls > strong {
+  white-space: nowrap;
 }
 
 .catalog-move-actions {
@@ -1168,6 +1226,10 @@ select:focus {
   background: transparent;
 }
 
+.catalog-group .catalog-edit-row {
+  padding: 0 2px;
+}
+
 .catalog-empty {
   margin: 0;
   padding: 16px 0 4px;
@@ -1192,7 +1254,8 @@ select:focus {
   justify-content: space-between;
   gap: 14px;
   list-style: none;
-  min-height: 54px;
+  min-height: 46px;
+  padding: 5px 0;
   cursor: pointer;
 }
 
@@ -1219,15 +1282,16 @@ select:focus {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.9rem;
 }
 
 .catalog-edit-indicator {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  width: 34px;
   min-height: 34px;
-  padding: 0 9px;
+  padding: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--ink);
@@ -2490,6 +2554,45 @@ select:focus {
     align-items: flex-start;
   }
 
+  .member-manager {
+    padding: 12px;
+  }
+
+  .member-create-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .member-create-form > label:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .member-list {
+    grid-template-columns: 1fr;
+    margin-top: 12px;
+  }
+
+  .member-chip {
+    padding: 9px;
+  }
+
+  .member-compact-controls {
+    grid-template-columns: minmax(0, 1fr) 38px;
+    gap: 6px;
+  }
+
+  .member-role-form {
+    grid-column: 1 / -1;
+  }
+
+  .member-pin-block {
+    grid-column: 1;
+  }
+
+  .member-delete-form {
+    grid-column: 2;
+  }
+
   .self-drink-form {
     grid-template-columns: 1fr;
   }
@@ -2574,6 +2677,193 @@ select:focus {
   .responsive-table td:nth-last-child(2):nth-child(odd),
   .responsive-table td:last-child {
     border-bottom: 0;
+  }
+
+  .ledger-booking-table tbody,
+  .treasury-book-table tbody {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .ledger-booking-table tr {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 5px 8px;
+    overflow: visible;
+    padding: 9px 10px;
+  }
+
+  .ledger-booking-table td,
+  .treasury-book-table td {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .ledger-booking-table td::before,
+  .treasury-book-table td::before {
+    display: none;
+  }
+
+  .ledger-booking-table td.ledger-type {
+    grid-row: 1;
+    grid-column: 1;
+    color: var(--muted);
+    font-size: 0.74rem;
+    font-weight: 800;
+  }
+
+  .ledger-booking-table td.ledger-member {
+    grid-row: 1;
+    grid-column: 2;
+    overflow: hidden;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ledger-booking-table td.ledger-amount {
+    grid-row: 1;
+    grid-column: 3;
+    justify-content: flex-end;
+    white-space: nowrap;
+  }
+
+  .ledger-booking-table td.ledger-menu-cell {
+    grid-row: 1;
+    grid-column: 4;
+    width: auto;
+  }
+
+  .ledger-booking-table td.ledger-description {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    padding: 5px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .ledger-booking-table .stacked-cell {
+    gap: 1px;
+    line-height: 1.25;
+  }
+
+  .ledger-booking-table td.ledger-date,
+  .ledger-booking-table td.ledger-quantity {
+    grid-row: 3;
+    color: var(--muted);
+    font-size: 0.74rem;
+  }
+
+  .ledger-booking-table td.ledger-date {
+    grid-column: 1;
+  }
+
+  .ledger-booking-table td.ledger-quantity {
+    grid-column: 2;
+  }
+
+  .ledger-booking-table td.ledger-status {
+    grid-row: 3;
+    grid-column: 3 / -1;
+    justify-content: flex-end;
+  }
+
+  .ledger-booking-table .status-pill,
+  .treasury-book-table .status-pill {
+    min-height: 24px;
+    padding: 0 7px;
+    font-size: 0.72rem;
+  }
+
+  .ledger-booking-table .entry-menu-wrap {
+    width: auto;
+  }
+
+  .ledger-booking-table .entry-menu-list {
+    position: absolute;
+    top: 42px;
+    right: 0;
+  }
+
+  .treasury-book-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(170px, 210px);
+    align-items: center !important;
+    gap: 10px;
+  }
+
+  .treasury-period-filter {
+    min-width: 0;
+  }
+
+  .treasury-book-table tr {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 5px 8px;
+    padding: 9px 10px;
+  }
+
+  .treasury-book-table td.treasury-description {
+    grid-row: 1;
+    grid-column: 1;
+    overflow: hidden;
+  }
+
+  .treasury-book-table td.treasury-description strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .treasury-book-table td.treasury-amount {
+    grid-row: 1;
+    grid-column: 2;
+    justify-content: flex-end;
+    white-space: nowrap;
+  }
+
+  .treasury-book-table td.treasury-actions {
+    grid-row: 1;
+    grid-column: 3;
+    width: auto;
+  }
+
+  .treasury-book-table td.treasury-date,
+  .treasury-book-table td.treasury-type {
+    grid-row: 2;
+    color: var(--muted);
+    font-size: 0.74rem;
+  }
+
+  .treasury-book-table td.treasury-date {
+    grid-column: 1;
+  }
+
+  .treasury-book-table td.treasury-type {
+    grid-column: 2;
+  }
+
+  .treasury-book-table td.treasury-status {
+    grid-row: 2;
+    grid-column: 3;
+    justify-content: flex-end;
+  }
+
+  .treasury-book-table td.treasury-member {
+    grid-row: 3;
+    grid-column: 1 / -1;
+    overflow: hidden;
+    color: var(--muted);
+    font-size: 0.76rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .treasury-book-table td.treasury-member.empty {
+    display: none;
   }
 
   .ledger-actions {
@@ -2695,19 +2985,12 @@ select:focus {
     right: 0;
   }
 
-  .entry-menu-wrap,
-  .entry-action-row {
+  .entry-menu-wrap {
     width: 100%;
   }
 
   .entry-action-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .entry-action-row form,
-  .entry-quick-action {
-    width: 100%;
+    display: none;
   }
 
   .entry-dialog-backdrop {
@@ -2767,8 +3050,8 @@ select:focus {
   .catalog-browser .catalog-page-row {
     align-items: center;
     flex-direction: row;
-    min-height: 54px;
-    padding: 9px 12px;
+    min-height: 48px;
+    padding: 7px 10px;
   }
 
   .catalog-page-row span strong {
@@ -2792,20 +3075,21 @@ select:focus {
   }
 
   .catalog-create-summary {
-    padding: 8px 14px;
+    min-height: 46px;
+    padding: 7px 12px;
   }
 
   .catalog-create-area .catalog-form {
-    padding: 0 14px 14px;
+    padding: 0 12px 12px;
   }
 
   .catalog-group {
-    padding: 0 14px 12px;
+    padding: 0 12px 10px;
   }
 
   .catalog-group-heading {
     grid-template-columns: auto minmax(0, 1fr) auto;
-    min-height: 52px;
+    min-height: 48px;
   }
 
   .catalog-group-tools {
@@ -2834,7 +3118,8 @@ select:focus {
   }
 
   .catalog-edit-indicator {
-    min-height: 38px;
+    width: 36px;
+    min-height: 36px;
   }
 
   .catalog-edit-actions {
@@ -2887,4 +3172,3 @@ select:focus {
       border-color 140ms ease;
   }
 }
-
