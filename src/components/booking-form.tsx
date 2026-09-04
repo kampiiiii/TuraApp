@@ -1,5 +1,6 @@
 import { ReceiptText } from "lucide-react";
 import { createLedgerEntryAction } from "@/app/actions";
+import { SubmitButton } from "@/components/submit-button";
 import { formatMoney, todayInputValue } from "@/lib/money";
 import type { CatalogItem, Team, TeamMember } from "@/lib/types";
 
@@ -95,11 +96,12 @@ export function BookingForm({
           <input name="notes" placeholder="Training, Spieltag, Barzahlung..." disabled={disabled} />
         </label>
 
-        <button className="primary-button align-end" type="submit" disabled={disabled}>
+        <SubmitButton className="primary-button align-end" disabled={disabled} pendingLabel="Buchung wird gespeichert">
           <ReceiptText size={16} />
           Buchen
-        </button>
+        </SubmitButton>
       </form>
     </section>
   );
 }
+

@@ -6,6 +6,7 @@ import { Banknote, Beer, ChevronDown, ClipboardList, Plus, Search, Users, X } fr
 import { createBulkPaymentAction, createLedgerEntryAction } from "@/app/actions";
 import { LedgerEntryMenu } from "@/components/ledger-entry-menu";
 import { StatusPill } from "@/components/status-pill";
+import { SubmitButton } from "@/components/submit-button";
 import { formatMoney, todayInputValue } from "@/lib/money";
 import type { CatalogItem, LedgerEntry, MemberBalance, Team, TeamMember } from "@/lib/types";
 
@@ -342,10 +343,14 @@ function BulkPaymentPanel({
           Buchungsgrund
           <input name="description" placeholder="Sammelzahlung erhalten" disabled={disabled} />
         </label>
-        <button className="primary-button quick-book-wide" type="submit" disabled={disabled || !selectedMemberIds.length}>
+        <SubmitButton
+          className="primary-button quick-book-wide"
+          disabled={disabled || !selectedMemberIds.length}
+          pendingLabel="Zahlungen werden gespeichert"
+        >
           <Banknote size={16} />
           Zahlungen buchen
-        </button>
+        </SubmitButton>
       </form>
     </details>
   );
@@ -538,10 +543,10 @@ function QuickBooking({
           <input name="description" placeholder={type === "payment" ? "Zahlung erhalten" : "Manuelle Buchung"} disabled={disabled} />
         </label>
 
-        <button className="primary-button quick-book-wide" type="submit" disabled={disabled}>
+        <SubmitButton className="primary-button quick-book-wide" disabled={disabled} pendingLabel="Buchung wird gespeichert">
           <Plus size={16} />
           Buchen
-        </button>
+        </SubmitButton>
       </form>
     </div>
   );

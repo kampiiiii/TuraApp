@@ -511,7 +511,7 @@ async function readStoredState(): Promise<TeamState | null> {
     }
 
     const store = getStore(STORE_NAME);
-    return (await store.get(STATE_KEY, { type: "json" })) as TeamState | null;
+    return (await store.get(STATE_KEY, { type: "json", consistency: "strong" })) as TeamState | null;
   } catch {
     return null;
   }
@@ -592,3 +592,4 @@ function normalizeState(state: TeamState): TeamState {
 function useLocalFileStore() {
   return !process.env.NETLIFY_BLOBS_CONTEXT;
 }
+

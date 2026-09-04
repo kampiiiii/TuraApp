@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Banknote, Plus, Trash2, Users } from "lucide-react";
 import { createBulkPaymentAction } from "@/app/actions";
+import { SubmitButton } from "@/components/submit-button";
 import { formatMoney, todayInputValue } from "@/lib/money";
 import type { MemberBalance, Team, TeamMember } from "@/lib/types";
 
@@ -125,10 +126,14 @@ export function AdminBulkPaymentForm({
             Buchungsgrund
             <input name="description" placeholder="Barzahlung erhalten" disabled={disabled} />
           </label>
-          <button className="primary-button" type="submit" disabled={disabled || !selectedBalances.length}>
+          <SubmitButton
+            className="primary-button"
+            disabled={disabled || !selectedBalances.length}
+            pendingLabel="Zahlungen werden gespeichert"
+          >
             <Banknote size={16} />
             {selectedBalances.length} Zahlungen buchen
-          </button>
+          </SubmitButton>
         </div>
       </form>
     </section>

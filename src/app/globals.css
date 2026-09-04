@@ -774,6 +774,35 @@ select:focus {
   font-weight: 800;
 }
 
+.submit-button {
+  position: relative;
+}
+
+.submit-button-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.submit-button-content.pending {
+  opacity: 0;
+}
+
+.submit-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: submit-spin 800ms linear infinite;
+}
+
+@keyframes submit-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
 .primary-button {
   justify-content: center;
   padding: 0 14px;
