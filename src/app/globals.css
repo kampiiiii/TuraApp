@@ -1191,7 +1191,8 @@ select:focus {
   text-transform: uppercase;
 }
 
-.catalog-row-controls {
+.catalog-row .catalog-row-controls {
+  display: flex;
   flex: 0 0 auto;
   gap: 8px;
 }
