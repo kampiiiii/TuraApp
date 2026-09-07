@@ -58,14 +58,14 @@ export function AdminBulkPaymentForm({
             <small>Mehrere Spieler mit jeweils eigenem Zahlbetrag buchen</small>
           </span>
         </span>
-        <span>{selectedMemberIds.length} ausgewaehlt</span>
+        <span>{selectedMemberIds.length} ausgewählt</span>
       </div>
 
       <div className="admin-bulk-payment-add">
         <label>
-          Spieler hinzufuegen
+          Spieler hinzufügen
           <select value={nextMemberId} onChange={(event) => setNextMemberId(event.target.value)} disabled={disabled}>
-            <option value="">Spieler auswaehlen</option>
+            <option value="">Spieler auswählen</option>
             {availableBalances.map((balance) => (
               <option value={balance.member_id} key={balance.member_id}>
                 {balance.display_name} | offen {formatMoney(balance.amount_due_cents, team?.currency)}
@@ -75,7 +75,7 @@ export function AdminBulkPaymentForm({
         </label>
         <button className="ghost-button" type="button" onClick={addPlayer} disabled={disabled || !nextMemberId}>
           <Plus size={16} />
-          Hinzufuegen
+          Hinzufügen
         </button>
       </div>
 
@@ -95,7 +95,7 @@ export function AdminBulkPaymentForm({
                     name={`amount_${balance.member_id}`}
                     inputMode="decimal"
                     placeholder="0,00"
-                    aria-label={`Zahlbetrag fuer ${balance.display_name}`}
+                    aria-label={`Zahlbetrag für ${balance.display_name}`}
                     disabled={disabled}
                     required
                   />
@@ -113,7 +113,7 @@ export function AdminBulkPaymentForm({
               </div>
             ))
           ) : (
-            <p className="muted compact-message">Spieler hinzufuegen und den tatsaechlich erhaltenen Betrag eintragen.</p>
+            <p className="muted compact-message">Spieler hinzufügen und den tatsächlich erhaltenen Betrag eintragen.</p>
           )}
         </div>
 
@@ -139,4 +139,3 @@ export function AdminBulkPaymentForm({
     </section>
   );
 }
-

@@ -25,8 +25,8 @@ export default async function BookingsPage() {
         title={isAdmin ? "Alle Buchungen" : "Meine Buchungen"}
         description={
           isAdmin
-            ? "Bearbeiten legt nachvollziehbare Korrekturen an. Stornierte Eintraege bleiben sichtbar."
-            : "Stornierte Eintraege bleiben sichtbar, damit die Kasse nachvollziehbar bleibt."
+            ? "Bearbeiten legt nachvollziehbare Korrekturen an. Stornierte Einträge bleiben sichtbar."
+            : "Stornierte Einträge bleiben sichtbar, damit die Kasse nachvollziehbar bleibt."
         }
       />
       <LedgerTable

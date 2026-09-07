@@ -7,7 +7,7 @@ import type { CatalogItem } from "@/lib/types";
 
 type CatalogView = "fine" | "drink";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 
 export function CatalogBrowser({
   catalog,
@@ -86,7 +86,7 @@ export function CatalogBrowser({
             onClick={() => selectType("drink")}
           >
             <Beer size={16} />
-            Getraenke
+            Getränke
             <span>{counts.drink}</span>
           </button>
         </div>
@@ -94,7 +94,7 @@ export function CatalogBrowser({
 
       <div className="catalog-page-list">
         <div className="section-title-row catalog-page-list-head">
-          <h2>{type === "fine" ? "Strafen" : "Getraenke"}</h2>
+          <h2>{type === "fine" ? "Strafen" : "Getränke"}</h2>
           <span>{items.length} Treffer</span>
         </div>
 
@@ -124,9 +124,8 @@ export function CatalogBrowser({
           </button>
         ) : null}
 
-        {!items.length ? <p className="muted catalog-page-empty">Keine passenden Eintraege.</p> : null}
+        {!items.length ? <p className="muted catalog-page-empty">Keine passenden Einträge.</p> : null}
       </div>
     </section>
   );
 }
-

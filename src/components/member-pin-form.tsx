@@ -28,8 +28,8 @@ export function MemberPinForm({ member, disabled = false }: { member: TeamMember
           name="access_pin"
           type="password"
           inputMode="numeric"
-          placeholder={member.role === "admin" ? "Spieler-PIN festlegen" : "Neue PIN"}
-          aria-label={`Neue Spieler-PIN fuer ${member.display_name}`}
+          placeholder={member.role === "admin" ? "Spieler-PIN" : "Neue PIN"}
+          aria-label={`Neue Spieler-PIN für ${member.display_name}`}
           disabled={disabled || pending}
           minLength={4}
           required
@@ -38,10 +38,6 @@ export function MemberPinForm({ member, disabled = false }: { member: TeamMember
           {pending ? "..." : "PIN"}
         </button>
       </form>
-
-      {member.role === "admin" && state.status === "idle" ? (
-        <small className="member-pin-hint">Admins melden sich mit dem Admin-Passwort an.</small>
-      ) : null}
 
       {state.status === "success" ? (
         <p className="member-pin-message success" role="status">

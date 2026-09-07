@@ -27,7 +27,7 @@ export default async function TreasuryPage() {
       <PageHeader
         eyebrow="Kassenwart"
         title="Kassenbestand"
-        description="Tatsaechliche Einnahmen und Ausgaben der Mannschaftskasse."
+        description="Tatsächliche Einnahmen und Ausgaben der Mannschaftskasse."
       />
       <TreasurySummary summary={data.treasury.summary} team={data.team} />
       <TreasuryForm disabled={data.isDemo} />

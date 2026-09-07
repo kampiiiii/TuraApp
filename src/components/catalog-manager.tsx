@@ -40,7 +40,7 @@ export function CatalogManager({
           </span>
           <span>
             <h2>Katalog verwalten</h2>
-            <small>Preise fuer Buchungen zentral pflegen</small>
+            <small>Preise für Buchungen zentral pflegen</small>
           </span>
         </span>
         <span>{catalog.length} Positionen</span>
@@ -59,12 +59,12 @@ export function CatalogManager({
             Art
             <select name="type" defaultValue="fine" disabled={disabled}>
               <option value="fine">Strafe</option>
-              <option value="drink">Getraenk</option>
+              <option value="drink">Getränk</option>
             </select>
           </label>
           <label>
             Name
-            <input name="name" placeholder="Zu spaet" disabled={disabled} required />
+            <input name="name" placeholder="Zu spät" disabled={disabled} required />
           </label>
           <label>
             Betrag
@@ -80,7 +80,7 @@ export function CatalogManager({
           </label>
           <button className="primary-button align-end" type="submit" disabled={disabled}>
             <Plus size={16} />
-            Hinzufuegen
+            Hinzufügen
           </button>
         </form>
       </details>
@@ -92,7 +92,7 @@ export function CatalogManager({
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Strafe oder Getraenk suchen"
+            placeholder="Strafe oder Getränk suchen"
             aria-label="Katalog durchsuchen"
           />
         </label>
@@ -110,7 +110,7 @@ export function CatalogManager({
           searching={Boolean(normalizedQuery)}
         />
         <CatalogList
-          title="Getraenke"
+          title="Getränke"
           type="drink"
           items={drinks}
           team={team}
@@ -140,7 +140,7 @@ function CatalogList({
   disabled: boolean;
   searching: boolean;
 }) {
-  const [visibleCount, setVisibleCount] = useState(8);
+  const [visibleCount, setVisibleCount] = useState(6);
   const effectiveCount = searching ? Math.max(visibleCount, 12) : visibleCount;
   const visibleItems = items.slice(0, effectiveCount);
   const remainingCount = items.length - visibleItems.length;
@@ -167,16 +167,15 @@ function CatalogList({
 
         return (
           <details className="catalog-row catalog-edit-row" key={item.id}>
-            <summary>
+            <summary title={`${item.name} bearbeiten`} aria-label={`${item.name} bearbeiten`}>
               <span className="catalog-row-main">
                 <strong>{item.name}</strong>
                 {item.in_kind_label ? <small className="in-kind-catalog-label">+ {item.in_kind_label}</small> : null}
               </span>
               <span className="catalog-row-controls">
                 <strong>{formatMoney(item.amount_cents, team?.currency)}</strong>
-                <span className="catalog-edit-indicator">
+                <span className="catalog-edit-indicator" aria-hidden="true">
                   <Pencil size={14} />
-                  Bearbeiten
                 </span>
               </span>
             </summary>
@@ -187,7 +186,7 @@ function CatalogList({
                 Art
                 <select name="type" defaultValue={item.type} disabled={disabled}>
                   <option value="fine">Strafe</option>
-                  <option value="drink">Getraenk</option>
+                  <option value="drink">Getränk</option>
                 </select>
               </label>
               <label>
@@ -236,9 +235,9 @@ function CatalogList({
       })}
 
       {remainingCount > 0 ? (
-        <button className="ghost-button catalog-more-button" type="button" onClick={() => setVisibleCount((count) => count + 8)}>
+        <button className="ghost-button catalog-more-button" type="button" onClick={() => setVisibleCount((count) => count + 6)}>
           <ChevronDown size={16} />
-          Weitere {Math.min(8, remainingCount)} anzeigen
+          Weitere {Math.min(6, remainingCount)} anzeigen
         </button>
       ) : null}
       {!items.length ? (
@@ -302,4 +301,3 @@ function formatAmountForInput(cents: number) {
     maximumFractionDigits: 2
   });
 }
-

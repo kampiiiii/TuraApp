@@ -82,7 +82,7 @@ export function MemberDashboard({
         {selectedBalance ? (
           <button className="ghost-button compact-button" type="button" onClick={() => setSelectedMemberId(null)}>
             <X size={16} />
-            Detail schliessen
+            Detail schließen
           </button>
         ) : null}
       </div>
@@ -158,7 +158,7 @@ export function MemberDashboard({
           {settledBalances.length ? (
             <div className="settled-group">
               <button className="settled-toggle" type="button" onClick={() => setShowSettled((value) => !value)}>
-                <span>Keine offenen Betraege</span>
+                <span>Keine offenen Beträge</span>
                 <span>
                   {settledBalances.length}
                   <ChevronDown size={17} className={showSettled ? "rotate" : ""} />
@@ -238,12 +238,12 @@ function PlayerRows({
 
         return (
           <article className={selectedMemberId === balance.member_id ? "player-row selected" : "player-row"} key={balance.member_id}>
-            <label className="payment-select" title={`${balance.display_name} fuer Sammelzahlung auswaehlen`}>
+            <label className="payment-select" title={`${balance.display_name} für Sammelzahlung auswählen`}>
               <input
                 type="checkbox"
                 checked={paymentMemberIds.includes(balance.member_id)}
                 onChange={() => onTogglePayment(balance.member_id)}
-                aria-label={`${balance.display_name} fuer Sammelzahlung auswaehlen`}
+                aria-label={`${balance.display_name} für Sammelzahlung auswählen`}
                 disabled={disabled}
               />
             </label>
@@ -288,7 +288,7 @@ function BulkPaymentPanel({
           <Users size={17} />
           <strong>Sammelzahlung</strong>
         </span>
-        <small>{selectedMemberIds.length} Spieler ausgewaehlt</small>
+        <small>{selectedMemberIds.length} Spieler ausgewählt</small>
       </summary>
       <div className="bulk-payment-actions">
         <button
@@ -297,7 +297,7 @@ function BulkPaymentPanel({
           onClick={() => setSelectedMemberIds(openBalances.map((balance) => balance.member_id))}
           disabled={disabled || !openBalances.length}
         >
-          Offene auswaehlen
+          Offene auswählen
         </button>
         <button
           className="ghost-button compact-button"
@@ -324,7 +324,7 @@ function BulkPaymentPanel({
                     name={`amount_${balance.member_id}`}
                     inputMode="decimal"
                     placeholder="0,00"
-                    aria-label={`Zahlbetrag fuer ${balance.display_name}`}
+                    aria-label={`Zahlbetrag für ${balance.display_name}`}
                     disabled={disabled}
                     required
                   />
@@ -332,7 +332,7 @@ function BulkPaymentPanel({
               </label>
             ))
           ) : (
-            <p className="muted compact-message">Spieler ueber die Auswahlfelder markieren.</p>
+            <p className="muted compact-message">Spieler über die Auswahlfelder markieren.</p>
           )}
         </div>
         <label>
@@ -379,7 +379,7 @@ function PlayerDetail({
     return (
       <aside className="player-detail-panel placeholder">
         <ClipboardList size={22} />
-        <strong>Spieler auswaehlen</strong>
+        <strong>Spieler auswählen</strong>
       </aside>
     );
   }
@@ -397,7 +397,7 @@ function PlayerDetail({
           <strong className={balance.balance_cents > 0 ? "detail-balance due" : "detail-balance"}>
             {formatMoney(balance.balance_cents, team?.currency)}
           </strong>
-          <button className="icon-button player-detail-close" type="button" onClick={onClose} aria-label="Detailansicht schliessen">
+          <button className="icon-button player-detail-close" type="button" onClick={onClose} aria-label="Detailansicht schließen">
             <X size={18} />
           </button>
         </div>
@@ -406,7 +406,7 @@ function PlayerDetail({
       <div className="player-detail-metrics">
         <Metric label="Gesamt" value={formatMoney(balance.balance_cents, team?.currency)} strong={balance.balance_cents > 0} />
         <Metric label="Strafen" value={formatMoney(balance.fine_cents, team?.currency)} />
-        <Metric label="Getraenke" value={formatMoney(balance.drink_cents, team?.currency)} />
+        <Metric label="Getränke" value={formatMoney(balance.drink_cents, team?.currency)} />
         <Metric label="Bezahlt" value={formatMoney(balance.payment_cents, team?.currency)} />
       </div>
 
@@ -489,7 +489,7 @@ function QuickBooking({
           </button>
           <button className={type === "drink" ? "active" : ""} type="button" onClick={() => setType("drink")}>
             <Beer size={15} />
-            Getraenk
+            Getränk
           </button>
           <button className={type === "payment" ? "active" : ""} type="button" onClick={() => setType("payment")}>
             <Banknote size={15} />
@@ -497,7 +497,7 @@ function QuickBooking({
           </button>
         </div>
         {defaultOpen ? null : (
-          <button className="icon-button" type="button" onClick={() => setOpen(false)} aria-label="Schnellbuchung schliessen">
+          <button className="icon-button" type="button" onClick={() => setOpen(false)} aria-label="Schnellbuchung schließen">
             <X size={15} />
           </button>
         )}
@@ -565,12 +565,12 @@ const playerFilters: { value: PlayerFilter; label: string }[] = [
   { value: "all", label: "Alle" },
   { value: "open", label: "Offen" },
   { value: "fine", label: "Strafen" },
-  { value: "drink", label: "Getraenke" },
+  { value: "drink", label: "Getränke" },
   { value: "paid", label: "Bezahlt" }
 ];
 
 const playerSorts: { value: PlayerSort; label: string }[] = [
-  { value: "due-desc", label: "Offen: hoechster zuerst" },
+  { value: "due-desc", label: "Offen: höchster zuerst" },
   { value: "due-asc", label: "Offen: niedrigster zuerst" },
   { value: "name-asc", label: "Name A-Z" },
   { value: "name-desc", label: "Name Z-A" },
@@ -625,7 +625,7 @@ function togglePaymentMember(memberId: string, setPaymentMemberIds: Dispatch<Set
 
 function labelForType(type: LedgerEntry["type"]) {
   if (type === "fine") return "Strafe";
-  if (type === "drink") return "Getraenk";
+  if (type === "drink") return "Getränk";
   if (type === "fee") return "Beitrag";
   if (type === "interest") return "Zinsen";
   if (type === "payment") return "Zahlung";
@@ -635,4 +635,3 @@ function labelForType(type: LedgerEntry["type"]) {
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("de-DE").format(new Date(date));
 }
-

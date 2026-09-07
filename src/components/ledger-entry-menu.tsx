@@ -31,7 +31,7 @@ export function LedgerEntryMenu({
 
   return (
     <div className="entry-menu-wrap">
-      <div className="button-row" aria-label="Buchungsaktionen">
+      <div className="entry-action-row" aria-label="Buchungsaktionen">
         {canEdit ? (
           <button className="ghost-button compact-button" type="button" onClick={() => setEditing(true)} disabled={disabled}>
             <Pencil size={15} />
@@ -58,7 +58,7 @@ export function LedgerEntryMenu({
       </div>
 
       <details className="entry-menu">
-        <summary className="icon-button" aria-label="Buchungsmenue" title="Buchungsmenue">
+        <summary className="icon-button" aria-label="Buchungsmenü" title="Buchungsmenü">
           <MoreVertical size={16} />
         </summary>
         <div className="entry-menu-list">
@@ -74,7 +74,7 @@ export function LedgerEntryMenu({
               <input type="hidden" name="completed" value={entry.in_kind_completed_at ? "false" : "true"} />
               <button className="entry-menu-item" type="submit" disabled={disabled}>
                 {entry.in_kind_completed_at ? <RotateCcw size={15} /> : <Check size={15} />}
-                {entry.in_kind_completed_at ? "Wieder oeffnen" : "Abhaken"}
+                {entry.in_kind_completed_at ? "Wieder öffnen" : "Abhaken"}
               </button>
             </form>
           ) : null}
@@ -106,7 +106,7 @@ export function LedgerEntryMenu({
                 <strong>Buchung bearbeiten</strong>
                 <small>{entry.member_name} | {formatMoney(entry.total_amount_cents, team?.currency)}</small>
               </span>
-              <button className="icon-button" type="button" onClick={() => setEditing(false)} aria-label="Schliessen">
+              <button className="icon-button" type="button" onClick={() => setEditing(false)} aria-label="Schließen">
                 <X size={16} />
               </button>
             </div>
@@ -137,7 +137,7 @@ export function LedgerEntryMenu({
                   disabled={disabled}
                 >
                   <option value="fine">Strafe</option>
-                  <option value="drink">Getraenk</option>
+                  <option value="drink">Getränk</option>
                   <option value="payment">Zahlung</option>
                   <option value="adjustment">Anpassung</option>
                 </select>
