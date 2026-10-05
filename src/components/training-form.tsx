@@ -43,7 +43,7 @@ export function TrainingForm({ members, catalog, today }: { members: TeamMember[
       <label>Notiz<input name="notes" defaultValue="Trainingsabend" maxLength={500} /></label>
     </div>
     <input type="hidden" name="rows" value={JSON.stringify(rows)} />
-    <section className="training-builder">
+    {!review ? <section className="training-builder">
       <div className="workflow-modes">
         <button type="button" aria-pressed={type === "drink"} onClick={() => { setType("drink"); setItemId(""); }}><Beer size={18} /> Getränke</button>
         <button type="button" aria-pressed={type === "fine"} onClick={() => { setType("fine"); setItemId(""); }}><ClipboardList size={18} /> Strafen</button>
@@ -63,7 +63,7 @@ export function TrainingForm({ members, catalog, today }: { members: TeamMember[
       </div>
       <button type="button" onClick={add}><Plus size={18} /> Position hinzufügen</button>
       {error ? <p role="alert">{error}</p> : null}
-    </section>
+    </section> : null}
     <div className="section-title-row"><h2>{review ? "Buchungen prüfen" : "Erfasste Positionen"} ({rows.length})</h2><strong>{formatMoney(total)}</strong></div>
     <div className="training-rows">{rows.map((row) => <div className="training-row" key={row.id}>
       <span><strong>{players.find((player) => player.id === row.memberId)?.display_name}</strong><small>{row.description}</small></span>

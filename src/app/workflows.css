@@ -2,8 +2,14 @@
 .workflow-grid label,.training-builder>label { display:grid; gap:6px; min-width:0; }
 .workflow-grid input,.workflow-grid select,.training-builder select { width:100%; min-width:0; }
 .workflow-modes,.workflow-chips { display:flex; gap:8px; flex-wrap:wrap; }
+.training-form button,.account-statement button { border:1px solid var(--line-strong); border-radius:6px; background:var(--panel-muted); color:var(--ink); padding:10px 14px; font-weight:700; }
+.training-form button:hover,.account-statement button:hover { background:var(--hover); }
+.training-form button:disabled { opacity:.55; }
+.training-form .submit-button,.training-form>fieldset>button,.account-statement button[type="submit"] { background:var(--brand); border-color:var(--brand); color:white; }
+.training-form .submit-button:hover,.account-statement button[type="submit"]:hover { background:var(--brand-dark); }
+.training-form .workflow-chips button { padding:6px 10px; }
 .workflow-modes button,.workflow-chips button,.training-form>button,.training-builder>button,.account-statement button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; }
-.workflow-modes button[aria-pressed="true"] { border-color:var(--accent,#ef3340); }
+.workflow-modes button[aria-pressed="true"] { border-color:var(--accent); background:var(--brand-soft); color:var(--accent); }
 .training-form { display:grid; gap:18px; }
 .training-builder { display:grid; gap:12px; padding-block:16px; border-block:1px solid #36363b; }
 .training-row,.statement-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #36363b; break-inside:avoid; }
