@@ -14,7 +14,9 @@ import {
   verifyPin
 } from "@/lib/auth";
 import { parseEuroToCents, parseQuantity } from "@/lib/money";
-import { attachLedgerNames, loadTeamState, saveTeamState } from "@/lib/team-store";
+import { attachLedgerNames, loadTeamState, saveTeamState, StateConflictError } from "@/lib/team-store";
+import { bookingRequestId, requestAlreadyBooked } from "@/lib/booking-requests";
+import { makeTrainingEntries, type TrainingRow } from "@/lib/training-bookings";
 import { addMembershipChange } from "@/lib/recurring-memberships";
 import type { CatalogItem, CatalogType, LedgerEntry, LedgerType, StoredTeamMember, TreasuryEntryType } from "@/lib/types";
 
@@ -22,6 +24,54 @@ export type PinChangeState = {
   status: "idle" | "success" | "error";
   message: string;
 };
+
+export type BookingFeedback = { status: "idle" | "success" | "error"; message: string };
+
+async function bookingFeedback(operation: () => Promise<BookingFeedback | void>, success: string, retry = true): Promise<BookingFeedback> {
+  for (let attempt = 0; attempt < (retry ? 4 : 1); attempt++) {
+    try { return (await operation()) ?? { status: "success", message: success }; }
+    catch (error) {
+      if (error instanceof StateConflictError && retry && attempt < 3) continue;
+    return { status: "error", message: error instanceof Error ? error.message : "Speichern fehlgeschlagen. Bitte erneut versuchen." };
+    }
+  }
+  return { status: "error", message: "Bitte erneut speichern." };
+}
+
+export async function createBookingFeedbackAction(_previous: BookingFeedback, form: FormData) {
+  return bookingFeedback(() => createLedgerEntryAction(form), "Buchung gespeichert.");
+}
+
+export async function createBulkPaymentFeedbackAction(_previous: BookingFeedback, form: FormData) {
+  return bookingFeedback(() => createBulkPaymentAction(form), "Zahlungen gespeichert.");
+}
+
+export async function createSelfDrinkFeedbackAction(previous: BookingFeedback, form: FormData) {
+  return bookingFeedback(() => createSelfDrinkAction(previous, form), "Getränk gespeichert.");
+}
+
+export async function updateBookingFeedbackAction(_previous: BookingFeedback, form: FormData) {
+  return bookingFeedback(() => updateLedgerEntryAction(form), "Korrektur gespeichert.", false);
+}
+
+export async function createTrainingBookingsAction(_previous: BookingFeedback, form: FormData) {
+  return bookingFeedback(async () => {
+    const { state, member: admin } = await requireAdmin();
+    const requestId = bookingRequestId(form, admin.id, "training");
+    if (!requestId) throw new Error("Die Buchungskennung fehlt. Bitte erneut versuchen.");
+    if (requestAlreadyBooked(state, requestId)) { revalidateAll(); return; }
+    const raw = String(form.get("rows") ?? "");
+    if (raw.length > 200_000) throw new Error("Zu viele Positionen.");
+    let rows: TrainingRow[];
+    try { rows = JSON.parse(raw); } catch { throw new Error("Die Positionen konnten nicht gelesen werden."); }
+    const entries = makeTrainingEntries(state, admin, rows, String(form.get("booking_date") ?? ""),
+      String(form.get("notes") ?? "Trainingsabend"), requestId, randomUUID, new Date().toISOString());
+    state.ledger.unshift(...entries);
+    await saveTeamState(state);
+    revalidateAll();
+    return { status: "success", message: `${entries.length} Buchungen gespeichert.` };
+  }, "Trainingsabend gespeichert.");
+}
 
 export type LoginState = {
   status: "idle" | "error";
@@ -565,6 +615,9 @@ export async function createSelfDrinkAction(
     return { status: "error", message: "Diese Buchung ist nur fuer Spieler vorgesehen." };
   }
 
+  const requestId = bookingRequestId(formData, member.id, "self-drink");
+  if (requestAlreadyBooked(state, requestId)) { revalidateAll(); return { status: "success", message: "Getränk bereits gespeichert." }; }
+
   if (!Number.isInteger(quantityRaw) || quantityRaw < 1 || quantityRaw > 50) {
     return { status: "error", message: "Bitte eine Menge zwischen 1 und 50 eingeben." };
   }
@@ -579,6 +632,7 @@ export async function createSelfDrinkAction(
 
   state.ledger.unshift({
     id: randomUUID(),
+    request_id: requestId,
     team_id: state.team.id,
     member_id: member.id,
     member_name: member.display_name,
@@ -622,6 +676,8 @@ export async function createSelfDrinkAction(
 
 export async function createLedgerEntryAction(formData: FormData) {
   const { state, member: admin } = await requireAdmin();
+  const requestId = bookingRequestId(formData, admin.id, "single");
+  if (requestAlreadyBooked(state, requestId)) { revalidateAll(); return; }
   const type = normalizeLedgerType(formData.get("type"));
   const memberId = String(formData.get("member_id") ?? "");
   const submittedCatalogItemId = String(formData.get("catalog_item_id") ?? "") || null;
@@ -671,6 +727,7 @@ export async function createLedgerEntryAction(formData: FormData) {
 
   state.ledger.unshift({
     id: randomUUID(),
+    request_id: requestId,
     team_id: state.team.id,
     member_id: memberId,
     member_name: bookedMember.display_name,
@@ -710,6 +767,8 @@ export async function createLedgerEntryAction(formData: FormData) {
 
 export async function createBulkPaymentAction(formData: FormData) {
   const { state, member: admin } = await requireAdmin();
+  const requestId = bookingRequestId(formData, admin.id, "payments");
+  if (requestAlreadyBooked(state, requestId)) { revalidateAll(); return; }
   const memberIds = Array.from(new Set(formData.getAll("member_ids").map(String).filter(Boolean)));
   const bookingDate = String(formData.get("booking_date") ?? "").trim() || new Date().toISOString().slice(0, 10);
   const description = String(formData.get("description") ?? "").trim() || "Sammelzahlung erhalten";
@@ -735,6 +794,7 @@ export async function createBulkPaymentAction(formData: FormData) {
 
     newEntries.push({
       id: randomUUID(),
+      request_id: requestId,
       team_id: state.team.id,
       member_id: memberId,
       member_name: bookedMember.display_name,
@@ -1149,5 +1209,7 @@ function revalidateAll() {
   revalidatePath("/kasse");
   revalidatePath("/beitraege");
   revalidatePath("/login");
+  revalidatePath("/training");
+  revalidatePath("/kontoauszug");
   refresh();
 }

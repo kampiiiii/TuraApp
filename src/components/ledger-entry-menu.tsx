@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Ban, Check, MoreVertical, Pencil, RotateCcw, X } from "lucide-react";
-import { setInKindCompletionAction, updateLedgerEntryAction, voidLedgerEntryAction } from "@/app/actions";
+import { setInKindCompletionAction, updateBookingFeedbackAction, voidLedgerEntryAction } from "@/app/actions";
+import { FeedbackForm } from "@/components/feedback-form";
+import { SubmitButton } from "@/components/submit-button";
 import { formatMoney } from "@/lib/money";
 import type { CatalogItem, LedgerEntry, Team, TeamMember } from "@/lib/types";
 
@@ -111,7 +113,7 @@ export function LedgerEntryMenu({
               </button>
             </div>
 
-            <form action={updateLedgerEntryAction} className="entry-edit-form">
+            <FeedbackForm action={updateBookingFeedbackAction} className="entry-edit-form" onSuccess={() => setEditing(false)}>
               <input type="hidden" name="entry_id" value={entry.id} />
 
               <label>
@@ -199,11 +201,11 @@ export function LedgerEntryMenu({
                 <button className="ghost-button" type="button" onClick={() => setEditing(false)}>
                   Abbrechen
                 </button>
-                <button className="primary-button" type="submit" disabled={disabled}>
+                <SubmitButton className="primary-button" disabled={disabled} pendingLabel="Speichert…">
                   Korrektur speichern
-                </button>
+                </SubmitButton>
               </div>
-            </form>
+            </FeedbackForm>
           </div>
         </div>
       ) : null}

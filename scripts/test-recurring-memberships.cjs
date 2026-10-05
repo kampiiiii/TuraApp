@@ -29,8 +29,9 @@ let uuid = 0, stored = "";
 const store = load("src/lib/team-store.ts", {
   "@/lib/recurring-memberships": helpers, "@/lib/demo-data": { demoData: {} },
   "@netlify/blobs": { getStore: () => ({ get: async () => null, setJSON: async () => {} }) },
-  "node:crypto": { randomUUID: () => `id-${++uuid}` }, "node:path": path,
-  "node:fs/promises": { mkdir: async () => {}, readFile: async () => stored, writeFile: async (_path, text) => { stored = text; } }
+  "node:crypto": { ...require("node:crypto"), randomUUID: () => `id-${++uuid}` }, "node:path": path,
+  "node:fs/promises": { mkdir: async () => {}, open: async () => ({ close: async () => {} }), unlink: async () => {}, rename: async () => {},
+    readFile: async () => stored, writeFile: async (_path, text) => { stored = text; } }
 });
 store.applyRecurringCharges(state, "2026-09-30");
 assert.equal(state.ledger.length, 2);
@@ -69,12 +70,14 @@ store.applyRecurringCharges(legacyState, "2026-09-30");
 assert.equal(legacyState.ledger.length, 4, "Existing all-player plans keep joined-date behavior");
 
 async function checkActionsAndPersistence() {
-  await store.saveTeamState(state);
+  stored = JSON.stringify(state);
+  await store.saveTeamState(await store.loadTeamState());
   const saved = JSON.parse(stored);
-  assert.equal(saved.version, 6);
+  assert.equal(saved.version, 7);
   assert.equal(saved.recurring_plans[0].membership_changes.length, 4);
   assert.equal(saved.ledger.length, state.ledger.length);
-  await store.saveTeamState(legacyState);
+  stored = JSON.stringify(legacyState);
+  await store.saveTeamState(await store.loadTeamState());
   assert.equal(JSON.parse(stored).recurring_plans[0].membership_changes.length, 0, "Legacy plans migrate without data loss");
   let role = "player", saveCount = 0;
   const actionState = { ...state, members: [...members, { id: "admin", role: "admin" }] };
@@ -83,6 +86,7 @@ async function checkActionsAndPersistence() {
     "next/cache": { refresh: () => {}, revalidatePath: () => {} }, "next/navigation": { redirect: () => {} },
     "@/lib/auth": { isAuthConfigured: () => true, getCurrentSession: async () => ({ memberId: role === "admin" ? "admin" : "alpha" }) },
     "@/lib/money": {}, "@/lib/recurring-memberships": helpers,
+    "@/lib/booking-requests": {}, "@/lib/training-bookings": {},
     "@/lib/team-store": { loadTeamState: async () => actionState, saveTeamState: async () => { saveCount++; }, attachLedgerNames: (ledger) => ledger }
   });
   const fields = new Map([["plan_id", "flat"], ["effective_month", nextMonth(berlinMonth())]]);

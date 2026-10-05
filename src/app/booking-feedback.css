@@ -1,0 +1,10 @@
+.booking-feedback { display: flex; align-items: flex-start; gap: 8px; grid-column: 1 / -1; margin: 8px 0; padding: 10px 12px; border-left: 3px solid var(--line-strong); background: var(--panel-muted); font-size: 14px; overflow-wrap: anywhere; }
+.booking-feedback svg { flex-shrink: 0; margin-top: 2px; }
+.booking-feedback.success { border-color: var(--ok); color: var(--ok); }
+.booking-feedback.error { border-color: var(--danger); color: var(--danger); }
+.feedback-fields { display: contents; margin: 0; padding: 0; border: 0; min-width: 0; }
+.saving-spinner { animation: saving-spin 1s linear infinite; }
+@keyframes saving-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .saving-spinner { animation: none; } }
+.workflow-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.workflow-links a { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; }
