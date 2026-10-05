@@ -3,6 +3,8 @@ import { PageHeader } from "@/components/page-header";
 import { RecurringPlanManager } from "@/components/recurring-plan-manager";
 import { getAppData } from "@/lib/team-queries";
 
+import "./contributions.css";
+
 export const dynamic = "force-dynamic";
 
 export default async function RecurringPlansPage() {
@@ -24,8 +26,8 @@ export default async function RecurringPlansPage() {
     <div className="page-stack">
       <PageHeader
         eyebrow="Kassenwart"
-        title="Monatliche Beitraege"
-        description="Wiederkehrende Monatsbeitraege und Getraenkeflats verwalten."
+        title="Monatliche Beiträge"
+        description="Wiederkehrende Monatsbeiträge und Getränkeflats verwalten."
       />
       <RecurringPlanManager
         plans={data.recurring_plans}

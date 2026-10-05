@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { demoData } from "@/lib/demo-data";
+import { membershipAt } from "@/lib/recurring-memberships";
 import type {
   CatalogItem,
   LedgerEntry,
@@ -209,16 +210,17 @@ export function applyRecurringCharges(state: TeamState, today = todayInBerlin())
     const assignedMembers = state.members.filter(
       (member) =>
         member.active &&
-        member.role === "player" &&
-        (plan.applies_to_all || plan.member_ids.includes(member.id))
+        member.role === "player"
     );
 
     for (const member of assignedMembers) {
-      const memberStartMonth = plan.applies_to_all
-        ? maxMonth(plan.start_month, member.joined_at.slice(0, 7))
-        : plan.start_month;
-
-      for (const period of monthPeriods(memberStartMonth, currentMonth)) {
+      for (const period of monthPeriods(plan.start_month, currentMonth)) {
+        const membership = membershipAt(plan, period);
+        if (membership.applies_to_all
+          ? period < maxMonth(plan.start_month, member.joined_at.slice(0, 7))
+          : !membership.member_ids.includes(member.id)) {
+          continue;
+        }
         const dueDate = `${period}-${String(plan.due_day).padStart(2, "0")}`;
         if (dueDate > today) {
           continue;
@@ -544,7 +546,7 @@ function normalizeState(state: TeamState): TeamState {
   }));
 
   return {
-    version: Math.max(state.version || 1, 5),
+    version: Math.max(state.version || 1, 6),
     team: {
       ...state.team,
       currency: state.team.currency || "EUR"
@@ -577,6 +579,7 @@ function normalizeState(state: TeamState): TeamState {
       due_day: Math.min(28, Math.max(1, plan.due_day || 1)),
       applies_to_all: plan.applies_to_all === true,
       member_ids: Array.isArray(plan.member_ids) ? plan.member_ids : [],
+      membership_changes: Array.isArray(plan.membership_changes) ? plan.membership_changes : [],
       annual_interest_rate_bps: Math.max(0, plan.annual_interest_rate_bps || 0),
       grace_days: Math.max(1, plan.grace_days || 30),
       active: plan.active !== false,
@@ -592,4 +595,3 @@ function normalizeState(state: TeamState): TeamState {
 function useLocalFileStore() {
   return !process.env.NETLIFY_BLOBS_CONTEXT;
 }
-
