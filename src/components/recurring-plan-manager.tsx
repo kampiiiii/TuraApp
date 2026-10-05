@@ -1,5 +1,7 @@
 import { CalendarClock, Pause, Play } from "lucide-react";
 import { createRecurringPlanAction, toggleRecurringPlanAction } from "@/app/actions";
+import { RecurringMembersEditor } from "@/components/recurring-members-editor";
+import { berlinMonth, membershipAt } from "@/lib/recurring-memberships";
 import { DeleteRecurringPlanButton } from "@/components/delete-recurring-plan-button";
 import { formatMoney } from "@/lib/money";
 import type { RecurringPlan, Team, TeamMember } from "@/lib/types";
@@ -17,11 +19,13 @@ export function RecurringPlanManager({
 }) {
   const players = members.filter((member) => member.active && member.role === "player");
 
+  const month = berlinMonth();
+
   return (
     <section className="recurring-panel">
       <div className="section-title-row">
         <h2>Neue Monatsregel</h2>
-        <span>Beitrag oder Getraenkeflat</span>
+        <span>Beitrag oder Getränkeflat</span>
       </div>
 
       <form action={createRecurringPlanAction} className="recurring-form">
@@ -34,7 +38,7 @@ export function RecurringPlanManager({
           Art
           <select name="ledger_type" defaultValue="fee" disabled={disabled}>
             <option value="fee">Monatsbeitrag</option>
-            <option value="drink">Getraenkeflat</option>
+            <option value="drink">Getränkeflat</option>
           </select>
         </label>
 
@@ -94,20 +98,28 @@ export function RecurringPlanManager({
               <span className="recurring-row-main">
                 <strong>{plan.name}</strong>
                 <small>
-                  {plan.ledger_type === "drink" ? "Getraenkeflat" : "Monatsbeitrag"} | Tag {plan.due_day} | ab {formatMonth(plan.start_month)}
+                  {plan.ledger_type === "drink" ? "Getränkeflat" : "Monatsbeitrag"} | Tag {plan.due_day} | ab {formatMonth(plan.start_month)}
                 </small>
                 <small>
-                  {plan.applies_to_all ? "Alle Spieler" : `${plan.member_ids.length} ausgewaehlte Spieler`}
+                  {membershipAt(plan, month).applies_to_all ? "Alle Spieler" : `${membershipAt(plan, month).member_ids.length} ausgewählte Spieler`}
                   {plan.annual_interest_rate_bps > 0
                     ? ` | ${(plan.annual_interest_rate_bps / 100).toLocaleString("de-DE")} % p.a. nach 30 Tagen`
                     : " | Keine Zinsen"}
                 </small>
+                {Array.from(new Set((plan.membership_changes ?? []).map((change) => change.effective_month)))
+                  .filter((effectiveMonth) => effectiveMonth > month).sort().map((effectiveMonth) => (
+                    <small key={effectiveMonth}>
+                      Ab {formatMonth(effectiveMonth)}: {membershipAt(plan, effectiveMonth).applies_to_all
+                        ? "Alle Spieler" : `${membershipAt(plan, effectiveMonth).member_ids.length} Spieler`}
+                    </small>
+                  ))}
               </span>
               <strong className="recurring-amount">{formatMoney(plan.amount_cents, team?.currency)}</strong>
               <span className={plan.active ? "status-pill paid" : "status-pill voided"}>
                 {plan.active ? "Aktiv" : "Pausiert"}
               </span>
               <span className="ledger-actions">
+                <RecurringMembersEditor plan={plan} members={members} disabled={disabled} />
                 <form action={toggleRecurringPlanAction} className="inline-action">
                   <input type="hidden" name="plan_id" value={plan.id} />
                   <button

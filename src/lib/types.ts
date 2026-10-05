@@ -136,6 +136,16 @@ export type TreasuryData = {
   entries: TreasuryBookEntry[];
 };
 
+export type RecurringMembershipChange = {
+  id: string;
+  effective_month: string;
+  applies_to_all: boolean;
+  member_ids: string[];
+  changed_at: string;
+  changed_by_member_id: string;
+  changed_by_name: string;
+};
+
 export type RecurringPlan = {
   id: string;
   team_id: string;
@@ -146,6 +156,7 @@ export type RecurringPlan = {
   start_month: string;
   applies_to_all: boolean;
   member_ids: string[];
+  membership_changes?: RecurringMembershipChange[];
   annual_interest_rate_bps: number;
   grace_days: number;
   active: boolean;

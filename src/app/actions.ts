@@ -15,6 +15,7 @@ import {
 } from "@/lib/auth";
 import { parseEuroToCents, parseQuantity } from "@/lib/money";
 import { attachLedgerNames, loadTeamState, saveTeamState } from "@/lib/team-store";
+import { addMembershipChange } from "@/lib/recurring-memberships";
 import type { CatalogItem, CatalogType, LedgerEntry, LedgerType, StoredTeamMember, TreasuryEntryType } from "@/lib/types";
 
 export type PinChangeState = {
@@ -496,6 +497,27 @@ export async function createRecurringPlanAction(formData: FormData) {
 
   await saveTeamState(state);
   revalidateAll();
+}
+
+export async function updateRecurringMembersAction(
+  _previousState: { status: "idle" | "success" | "error"; message: string },
+  formData: FormData
+): Promise<{ status: "idle" | "success" | "error"; message: string }> {
+  try {
+    const { state, member: admin } = await requireAdmin();
+    const plan = state.recurring_plans.find((candidate) => candidate.id === String(formData.get("plan_id") ?? ""));
+    if (!plan) return { status: "error", message: "Die Monatsregel wurde nicht gefunden." };
+    addMembershipChange(plan, state.members, {
+      effectiveMonth: String(formData.get("effective_month") ?? ""),
+      appliesToAll: formData.get("applies_to_all") === "on",
+      memberIds: formData.getAll("member_ids").map(String)
+    }, { id: randomUUID(), memberId: admin.id, name: admin.display_name, changedAt: new Date().toISOString() });
+    await saveTeamState(state);
+    revalidateAll();
+    return { status: "success", message: "Teilnehmer gespeichert." };
+  } catch (error) {
+    return { status: "error", message: error instanceof Error ? error.message : "Speichern fehlgeschlagen. Bitte erneut versuchen." };
+  }
 }
 
 export async function toggleRecurringPlanAction(formData: FormData) {
@@ -1129,4 +1151,3 @@ function revalidateAll() {
   revalidatePath("/login");
   refresh();
 }
-

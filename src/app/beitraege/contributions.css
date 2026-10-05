@@ -1,0 +1,45 @@
+.recurring-editor-dialog {
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  width: min(600px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
+}
+.recurring-editor-dialog::backdrop { background: rgb(0 0 0 / 60%); backdrop-filter: blur(3px); }
+.recurring-editor-form { display: flex; flex-direction: column; max-height: calc(100dvh - 26px); }
+.recurring-editor-header { display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--line); }
+.recurring-editor-header div { flex: 1; min-width: 0; }
+.recurring-editor-header h2 { margin: 0; font-size: 18px; }
+.recurring-editor-header p { margin: 4px 0 0; color: var(--muted); overflow-wrap: anywhere; }
+.recurring-editor-symbol { color: var(--accent); display: grid; place-items: center; }
+.recurring-editor-header .icon-button { width: 44px; height: 44px; flex-shrink: 0; }
+.recurring-editor-body { overflow-y: auto; min-height: 0; padding: 16px 20px; }
+.recurring-effective-month { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.recurring-effective-month span { display: flex; gap: 8px; align-items: center; }
+.recurring-effective-month input { width: 185px; min-height: 44px; font-size: 16px; min-width: 0; }
+.recurring-editor-all { display: flex; align-items: center; gap: 10px; min-height: 48px; margin: 10px 0; }
+.recurring-editor-dialog input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--accent); }
+.recurring-editor-search { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: var(--muted); }
+.recurring-editor-search input { min-width: 0; flex: 1; height: 44px; font-size: 16px; }
+.recurring-editor-search span { white-space: nowrap; font-size: 13px; }
+.recurring-editor-players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 16px; }
+.recurring-editor-player { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.recurring-editor-player span { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+.recurring-editor-player small { color: var(--muted); }
+.recurring-editor-footer { display: flex; align-items: center; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--line); background: var(--panel); }
+.recurring-editor-footer > span { flex: 1; font-size: 13px; }
+.recurring-editor-footer small { display: block; color: var(--muted); margin-top: 4px; }
+.recurring-editor-footer button { min-height: 44px; }
+.recurring-editor-error { color: var(--accent); }
+.recurring-saved { display: inline-flex; gap: 4px; align-items: center; color: var(--muted); font-size: 12px; }
+@media (max-width: 600px) {
+  .recurring-editor-header, .recurring-editor-body, .recurring-editor-footer { padding: 12px; }
+  .recurring-editor-players { grid-template-columns: minmax(0, 1fr); }
+  .recurring-editor-footer { flex-wrap: wrap; }
+  .recurring-editor-footer > span { flex-basis: 100%; }
+  .recurring-editor-footer button { flex: 1; justify-content: center; }
+  .recurring-effective-month input { width: 170px; }
+}
