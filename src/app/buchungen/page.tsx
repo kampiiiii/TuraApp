@@ -1,12 +1,13 @@
 import { LoginRequired, NoTeamState } from "@/components/empty-state";
-import { LedgerTable } from "@/components/ledger-table";
+import { LedgerBrowser } from "@/components/ledger-browser";
 import { PageHeader } from "@/components/page-header";
 import { getAppData } from "@/lib/team-queries";
+import "./bookings.css";
 
 export const dynamic = "force-dynamic";
 
 export default async function BookingsPage() {
-  const data = await getAppData();
+  const data = await getAppData(true);
 
   if (data.authState === "anonymous" || data.authState === "setup-required") {
     return <LoginRequired />;
@@ -25,11 +26,11 @@ export default async function BookingsPage() {
         title={isAdmin ? "Alle Buchungen" : "Meine Buchungen"}
         description={
           isAdmin
-            ? "Bearbeiten legt nachvollziehbare Korrekturen an. Stornierte Einträge bleiben sichtbar."
-            : "Stornierte Einträge bleiben sichtbar, damit die Kasse nachvollziehbar bleibt."
+            ? "Buchungen und nachvollziehbare Korrekturen der Mannschaft."
+            : "Deine Buchungen und nachvollziehbaren Korrekturen."
         }
       />
-      <LedgerTable
+      <LedgerBrowser
         entries={data.ledger}
         team={data.team}
         members={data.members}
