@@ -1,0 +1,32 @@
+.workflow-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; align-items:end; }
+.workflow-grid label,.training-builder>label { display:grid; gap:6px; min-width:0; }
+.workflow-grid input,.workflow-grid select,.training-builder select { width:100%; min-width:0; }
+.workflow-modes,.workflow-chips { display:flex; gap:8px; flex-wrap:wrap; }
+.workflow-modes button,.workflow-chips button,.training-form>button,.training-builder>button,.account-statement button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; }
+.workflow-modes button[aria-pressed="true"] { border-color:var(--accent,#ef3340); }
+.training-form { display:grid; gap:18px; }
+.training-builder { display:grid; gap:12px; padding-block:16px; border-block:1px solid #36363b; }
+.training-row,.statement-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #36363b; break-inside:avoid; }
+.training-row>span:first-child,.statement-row>span:first-child { flex:1; min-width:0; overflow-wrap:anywhere; }
+.training-row small,.statement-row small,.statement-row strong { display:block; }
+.training-row label { width:70px; font-size:12px; }
+.training-row input { width:100%; }
+.training-row button { min-height:44px; min-width:44px; }
+.statement-row>span:last-child { flex-shrink:0; text-align:right; }
+.statement-totals { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding-block:12px; border-block:1px solid #36363b; }
+.statement-totals span { font-size:13px; }
+.statement-totals strong { display:block; font-size:20px; }
+.workflow-grid .workflow-check { display:flex; align-items:center; min-height:44px; }
+.workflow-check input { width:auto; }
+@media(max-width:600px) { .statement-totals { grid-template-columns:repeat(2,1fr); } .training-row { flex-wrap:wrap; } .training-row>span:first-child { flex-basis:calc(100% - 82px); } .training-row strong { font-size:14px; } }
+@media print {
+  @page { size:A4; margin:15mm; }
+  body { background:white!important; color:black!important; }
+  body * { color:black!important; box-shadow:none!important; }
+  .no-print,aside,nav { display:none!important; }
+  .account-statement .page-header { display:block!important; }
+  .app-shell { display:block!important; }
+  main { margin:0!important; padding:0!important; max-width:none!important; }
+  .statement-row,.statement-totals { border-color:#aaa; }
+  .statement-totals { grid-template-columns:repeat(4,1fr); }
+}

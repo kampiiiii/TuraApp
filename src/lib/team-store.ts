@@ -1,6 +1,6 @@
 import { getStore } from "@netlify/blobs";
-import { randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { createHash, randomUUID } from "node:crypto";
+import { mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { demoData } from "@/lib/demo-data";
 import { membershipAt } from "@/lib/recurring-memberships";
@@ -17,34 +17,82 @@ import type {
 const STORE_NAME = "teamkasse";
 const STATE_KEY = "state.json";
 const LOCAL_STATE_PATH = join(process.cwd(), ".teamkasse", STATE_KEY);
+const loadedVersions = new WeakMap<TeamState, string | null>();
+
+export class StateConflictError extends Error {
+  constructor() {
+    super("Inzwischen wurde etwas geändert. Bitte erneut speichern; deine Eingaben bleiben erhalten.");
+    this.name = "StateConflictError";
+  }
+}
+
+function stateStore() {
+  return getStore({ name: STORE_NAME, consistency: "strong", fetch: async (input, init) => {
+    const response = await fetch(input, init);
+    if (!response.ok && response.status !== 404 && response.status !== 412) {
+      throw new Error("Der Datenspeicher ist momentan nicht erreichbar.");
+    }
+    return response;
+  } });
+}
 
 export async function loadTeamState(): Promise<TeamState> {
+  for (let attempt = 0; attempt < 4; attempt++) {
   const stored = await readStoredState();
-
-  if (stored) {
-    const normalized = normalizeState(stored);
-    if (applyRecurringCharges(normalized)) {
-      await saveTeamState(normalized);
+    const state = stored ? normalizeState(stored.state) : createInitialTeamState();
+    loadedVersions.set(state, stored?.etag ?? null);
+    if (stored && !applyRecurringCharges(state)) return state;
+  try {
+      await saveTeamState(state);
+      return state;
+    } catch (error) {
+      if (!(error instanceof StateConflictError)) throw error;
     }
-    return normalized;
   }
-
-  const initial = createInitialTeamState();
-  await saveTeamState(initial);
-  return initial;
+  throw new StateConflictError();
 }
 
 export async function saveTeamState(state: TeamState) {
+  if (!loadedVersions.has(state)) throw new StateConflictError();
+  const previousVersion = loadedVersions.get(state)!;
   const normalized = normalizeState(state);
-
   if (useLocalFileStore()) {
     await mkdir(join(process.cwd(), ".teamkasse"), { recursive: true });
-    await writeFile(LOCAL_STATE_PATH, JSON.stringify(normalized, null, 2), "utf8");
+    const lockPath = `${LOCAL_STATE_PATH}.lock`;
+    const temporaryPath = `${LOCAL_STATE_PATH}.${randomUUID()}.tmp`;
+    let lock;
+    for (let attempt = 0; attempt < 60; attempt++) {
+      try { lock = await open(lockPath, "wx"); break; }
+      catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+        await new Promise((resolve) => setTimeout(resolve, 25));
+      }
+    }
+    if (!lock) throw new StateConflictError();
+  try {
+      const current = await readStoredState();
+      if ((current?.etag ?? null) !== previousVersion) throw new StateConflictError();
+      const raw = JSON.stringify(normalized, null, 2);
+      await writeFile(temporaryPath, raw, "utf8");
+      await rename(temporaryPath, LOCAL_STATE_PATH);
+      loadedVersions.set(state, hashState(raw));
+    } finally {
+      await lock.close();
+      await unlink(lockPath);
+      await unlink(temporaryPath).catch(() => {});
+    }
     return;
   }
-
-  const store = getStore(STORE_NAME);
-  await store.setJSON(STATE_KEY, normalized);
+  try {
+    const result = await stateStore().setJSON(STATE_KEY, normalized,
+      previousVersion === null ? { onlyIfNew: true } : { onlyIfMatch: previousVersion });
+    if (!result.modified) throw new StateConflictError();
+    if (!result.etag) throw new Error("Speicherbestätigung fehlt.");
+    loadedVersions.set(state, result.etag);
+  } catch (error) {
+    if (error instanceof StateConflictError) throw error;
+    throw new Error("Speichern konnte nicht bestätigt werden. Bitte erneut versuchen.");
+  }
 }
 
 export function createInitialTeamState(): TeamState {
@@ -505,23 +553,31 @@ export function attachLedgerNames(
   }));
 }
 
-async function readStoredState(): Promise<TeamState | null> {
+function hashState(raw: string) {
+  return createHash("sha256").update(raw).digest("hex");
+}
+
+async function readStoredState(): Promise<{ state: TeamState; etag: string } | null> {
   try {
     if (useLocalFileStore()) {
       const raw = await readFile(LOCAL_STATE_PATH, "utf8");
-      return JSON.parse(raw) as TeamState;
+      return { state: JSON.parse(raw) as TeamState, etag: hashState(raw) };
     }
 
-    const store = getStore(STORE_NAME);
-    return (await store.get(STATE_KEY, { type: "json", consistency: "strong" })) as TeamState | null;
-  } catch {
-    return null;
+    const stored = await stateStore().getWithMetadata(STATE_KEY, { type: "json", consistency: "strong" });
+    if (!stored) return null;
+    if (!stored.etag || !stored.data) throw new Error("Datenstand ist unvollständig.");
+    return { state: stored.data as TeamState, etag: stored.etag };
+  } catch (error) {
+    if (useLocalFileStore() && (error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw new Error("Daten konnten nicht sicher geladen werden. Bitte erneut versuchen.");
   }
 }
 
 function normalizeState(state: TeamState): TeamState {
   const normalizedLedger: LedgerEntry[] = state.ledger.map((entry) => ({
     ...entry,
+    request_id: entry.request_id ?? null,
     member_name: entry.member_name === "Max Kassenwart" ? "Dustyn Kassenwart" : entry.member_name ?? "Unbekannt",
     catalog_item_name: entry.catalog_item_name ?? null,
     notes: entry.notes ?? null,
@@ -546,7 +602,7 @@ function normalizeState(state: TeamState): TeamState {
   }));
 
   return {
-    version: Math.max(state.version || 1, 6),
+    version: Math.max(state.version || 1, 7),
     team: {
       ...state.team,
       currency: state.team.currency || "EUR"

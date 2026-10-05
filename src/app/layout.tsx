@@ -4,6 +4,8 @@ import { AppShell } from "@/components/app-shell";
 import { ServiceWorker } from "@/components/service-worker";
 import { getShellData } from "@/lib/team-queries";
 import "./globals.css";
+import "./booking-feedback.css";
+import "./workflows.css";
 
 export const metadata: Metadata = {
   title: "TURA App",

@@ -47,6 +47,10 @@ export default async function DashboardPage() {
       />
 
       {isAdmin ? <TreasurySummary summary={data.treasury.summary} team={data.team} /> : null}
+      <nav className="workflow-links">
+        {isAdmin ? <Link className="text-link" href="/training">Trainingsabend</Link> : null}
+        <Link className="text-link" href="/kontoauszug">Kontoauszug</Link>
+      </nav>
 
       {!isAdmin && currentBalance ? (
         <section className="pay-preview">

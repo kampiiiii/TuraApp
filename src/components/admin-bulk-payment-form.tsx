@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { Banknote, Plus, Trash2, Users } from "lucide-react";
-import { createBulkPaymentAction } from "@/app/actions";
+import { createBulkPaymentFeedbackAction } from "@/app/actions";
+import { FeedbackForm } from "@/components/feedback-form";
 import { SubmitButton } from "@/components/submit-button";
 import { formatMoney, todayInputValue } from "@/lib/money";
 import type { MemberBalance, Team, TeamMember } from "@/lib/types";
@@ -79,7 +80,7 @@ export function AdminBulkPaymentForm({
         </button>
       </div>
 
-      <form action={createBulkPaymentAction} className="admin-bulk-payment-form">
+      <FeedbackForm action={createBulkPaymentFeedbackAction} className="admin-bulk-payment-form" onSuccess={() => setSelectedMemberIds([])}>
         <div className={selectedBalances.length ? "admin-bulk-payment-list has-players" : "admin-bulk-payment-list"}>
           {selectedBalances.length ? (
             selectedBalances.map((balance) => (
@@ -135,7 +136,7 @@ export function AdminBulkPaymentForm({
             {selectedBalances.length} Zahlungen buchen
           </SubmitButton>
         </div>
-      </form>
+      </FeedbackForm>
     </section>
   );
 }

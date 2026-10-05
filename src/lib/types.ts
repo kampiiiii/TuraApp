@@ -44,6 +44,7 @@ export type CatalogItem = {
 
 export type LedgerEntry = {
   id: string;
+  request_id?: string | null;
   team_id: string;
   member_id: string;
   member_name: string;

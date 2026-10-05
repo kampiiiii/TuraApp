@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { Dispatch, SetStateAction } from "react";
 import { Banknote, Beer, ChevronDown, ClipboardList, Plus, Search, Users, X } from "lucide-react";
-import { createBulkPaymentAction, createLedgerEntryAction } from "@/app/actions";
+import { createBulkPaymentFeedbackAction, createBookingFeedbackAction } from "@/app/actions";
+import { FeedbackForm } from "@/components/feedback-form";
 import { LedgerEntryMenu } from "@/components/ledger-entry-menu";
 import { StatusPill } from "@/components/status-pill";
 import { SubmitButton } from "@/components/submit-button";
@@ -308,7 +310,7 @@ function BulkPaymentPanel({
           Auswahl leeren
         </button>
       </div>
-      <form action={createBulkPaymentAction} className="bulk-payment-form">
+      <FeedbackForm action={createBulkPaymentFeedbackAction} className="bulk-payment-form" onSuccess={() => setSelectedMemberIds([])}>
         <div className="bulk-payment-list quick-book-wide">
           {selectedBalances.length ? (
             selectedBalances.map((balance) => (
@@ -351,7 +353,7 @@ function BulkPaymentPanel({
           <Banknote size={16} />
           Zahlungen buchen
         </SubmitButton>
-      </form>
+      </FeedbackForm>
     </details>
   );
 }
@@ -410,6 +412,7 @@ function PlayerDetail({
         <Metric label="Bezahlt" value={formatMoney(balance.payment_cents, team?.currency)} />
       </div>
 
+      <Link className="text-link" href={`/kontoauszug?spieler=${encodeURIComponent(member.id)}`}>Kontoauszug</Link>
       <QuickBooking member={member} catalog={catalog} team={team} disabled={disabled} defaultOpen />
 
       <div className="booking-card-list">
@@ -503,7 +506,7 @@ function QuickBooking({
         )}
       </div>
 
-      <form action={createLedgerEntryAction} className="quick-book-form">
+      <FeedbackForm action={createBookingFeedbackAction} className="quick-book-form">
         <input type="hidden" name="member_id" value={member.id} />
         <input type="hidden" name="type" value={type} />
 
@@ -547,7 +550,7 @@ function QuickBooking({
           <Plus size={16} />
           Buchen
         </SubmitButton>
-      </form>
+      </FeedbackForm>
     </div>
   );
 }

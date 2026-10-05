@@ -34,7 +34,6 @@ export default async function AdminPage() {
 
       <BookingForm members={data.members} catalog={data.catalog} team={data.team} disabled={data.isDemo} />
       <AdminBulkPaymentForm
-        key={data.ledger.length}
         balances={data.balances}
         members={data.members}
         team={data.team}

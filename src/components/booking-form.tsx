@@ -1,5 +1,6 @@
 import { ReceiptText } from "lucide-react";
-import { createLedgerEntryAction } from "@/app/actions";
+import { createBookingFeedbackAction } from "@/app/actions";
+import { FeedbackForm } from "@/components/feedback-form";
 import { SubmitButton } from "@/components/submit-button";
 import { formatMoney, todayInputValue } from "@/lib/money";
 import type { CatalogItem, Team, TeamMember } from "@/lib/types";
@@ -26,7 +27,7 @@ export function BookingForm({
         <span>Strafe, Getränk oder Zahlung</span>
       </div>
 
-      <form action={createLedgerEntryAction} className="booking-grid">
+      <FeedbackForm action={createBookingFeedbackAction} className="booking-grid">
         <label>
           Spieler
           <select name="member_id" disabled={disabled} required>
@@ -100,7 +101,7 @@ export function BookingForm({
           <ReceiptText size={16} />
           Buchen
         </SubmitButton>
-      </form>
+      </FeedbackForm>
     </section>
   );
 }
