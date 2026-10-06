@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { CalendarClock, ClipboardList, KeyRound, LayoutDashboard, LogIn, LogOut, ReceiptText, ShieldCheck, WalletCards } from "lucide-react";
 import { logoutAction } from "@/app/actions";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { MobileNavigation } from "@/components/mobile-navigation";
 import type { AppData } from "@/lib/types";
 
 type ShellContext = Pick<AppData, "isDemo" | "authState" | "team" | "currentMember">;
@@ -22,13 +23,13 @@ export function AppShell({ children, context }: { children: ReactNode; context: 
           </span>
         </Link>
 
-        <nav className="nav-list" aria-label="Hauptnavigation">
+        <nav className={showAppLinks ? "nav-list desktop-navigation" : "nav-list"} aria-label="Hauptnavigation">
           {showAppLinks ? (
             <>
               <NavLink href="/dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" />
               {isAdmin ? <NavLink href="/admin" icon={<ShieldCheck size={18} />} label="Admin" /> : null}
               {isAdmin ? <NavLink href="/kasse" icon={<WalletCards size={18} />} label="Kasse" /> : null}
-              {isAdmin ? <NavLink href="/beitraege" icon={<CalendarClock size={18} />} label="Beitraege" /> : null}
+              {isAdmin ? <NavLink href="/beitraege" icon={<CalendarClock size={18} />} label="Beiträge" /> : null}
               <NavLink href="/buchungen" icon={<ReceiptText size={18} />} label="Buchungen" />
               <NavLink href="/katalog" icon={<ClipboardList size={18} />} label="Katalog" />
               {!isAdmin ? <NavLink href="/profil" icon={<KeyRound size={18} />} label="Profil" /> : null}
@@ -51,6 +52,7 @@ export function AppShell({ children, context }: { children: ReactNode; context: 
           ) : null}
         </div>
       </aside>
+      {showAppLinks ? <MobileNavigation isAdmin={isAdmin} /> : null}
 
       <main className="main-panel">{children}</main>
     </div>

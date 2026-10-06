@@ -5,6 +5,7 @@ import { ForbiddenState, LoginRequired, NoTeamState } from "@/components/empty-s
 import { LedgerTable } from "@/components/ledger-table";
 import { MemberManager } from "@/components/member-manager";
 import { PageHeader } from "@/components/page-header";
+import { ResponsiveDisclosure } from "@/components/responsive-disclosure";
 import { getAppData } from "@/lib/team-queries";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +33,7 @@ export default async function AdminPage() {
         description="Spieler, Katalog und Buchungen an einem Ort. Nur angemeldete Admins können hier speichern."
       />
 
-      <BookingForm members={data.members} catalog={data.catalog} team={data.team} disabled={data.isDemo} />
+      <ResponsiveDisclosure title="Neue Buchung"><BookingForm members={data.members} catalog={data.catalog} team={data.team} disabled={data.isDemo} /></ResponsiveDisclosure>
       <AdminBulkPaymentForm
         balances={data.balances}
         members={data.members}
