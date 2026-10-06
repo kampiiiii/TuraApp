@@ -6,6 +6,7 @@ import { getShellData } from "@/lib/team-queries";
 import "./globals.css";
 import "./booking-feedback.css";
 import "./workflows.css";
+import "./mobile-usability.css";
 
 export const metadata: Metadata = {
   title: "TURA App",

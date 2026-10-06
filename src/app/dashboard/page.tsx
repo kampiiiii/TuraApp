@@ -5,6 +5,8 @@ import { LoginRequired, NoTeamState } from "@/components/empty-state";
 import { LedgerTable } from "@/components/ledger-table";
 import { InKindObligationList } from "@/components/in-kind-obligation-list";
 import { MemberDashboard } from "@/components/member-dashboard";
+import { MobileDashboardOverview } from "@/components/mobile-dashboard-overview";
+import { ResponsiveDisclosure } from "@/components/responsive-disclosure";
 import { PageHeader } from "@/components/page-header";
 import { SelfDrinkForm } from "@/components/self-drink-form";
 import { TreasurySummary } from "@/components/treasury-summary";
@@ -40,6 +42,8 @@ export default async function DashboardPage() {
         }
       />
 
+      <MobileDashboardOverview data={data} isAdmin={isAdmin} />
+      <div className="desktop-dashboard-summary">
       <BalanceCards
         balances={data.balances}
         team={data.team}
@@ -47,13 +51,14 @@ export default async function DashboardPage() {
       />
 
       {isAdmin ? <TreasurySummary summary={data.treasury.summary} team={data.team} /> : null}
+      </div>
       <nav className="workflow-links">
         {isAdmin ? <Link className="text-link" href="/training">Trainingsabend</Link> : null}
         <Link className="text-link" href="/kontoauszug">Kontoauszug</Link>
       </nav>
 
       {!isAdmin && currentBalance ? (
-        <section className="pay-preview">
+        <section className="pay-preview desktop-pay-preview">
           <span>
             <strong>{currentBalance.credit_cents > 0 ? "Dein Guthaben" : "Aktuell offen"}</strong>
             <small>
@@ -71,7 +76,7 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
-      {!isAdmin ? <SelfDrinkForm catalog={data.catalog} team={data.team} /> : null}
+      {!isAdmin ? <ResponsiveDisclosure title="Getränk buchen"><SelfDrinkForm catalog={data.catalog} team={data.team} /></ResponsiveDisclosure> : null}
 
       {isAdmin ? (
         <MemberDashboard
@@ -86,7 +91,7 @@ export default async function DashboardPage() {
 
       <InKindObligationList entries={data.ledger} canManage={isAdmin} disabled={data.isDemo} />
 
-      <section className="split-section">
+      <section className="split-section dashboard-open-list">
         <div>
           <div className="section-title-row">
             <h2>{isAdmin ? "Letzte offene Buchungen" : "Deine offenen Buchungen"}</h2>

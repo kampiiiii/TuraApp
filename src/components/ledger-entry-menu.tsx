@@ -5,6 +5,7 @@ import { Ban, Check, MoreVertical, Pencil, RotateCcw, X } from "lucide-react";
 import { setInKindCompletionAction, updateBookingFeedbackAction, voidLedgerEntryAction } from "@/app/actions";
 import { FeedbackForm } from "@/components/feedback-form";
 import { SubmitButton } from "@/components/submit-button";
+import { ResponsiveDialog } from "@/components/responsive-dialog";
 import { formatMoney } from "@/lib/money";
 import type { CatalogItem, LedgerEntry, Team, TeamMember } from "@/lib/types";
 
@@ -101,8 +102,7 @@ export function LedgerEntryMenu({
       </details>
 
       {editing ? (
-        <div className="entry-dialog-backdrop" role="presentation">
-          <div className="entry-dialog" role="dialog" aria-modal="true" aria-label="Buchung bearbeiten">
+        <ResponsiveDialog className="entry-dialog" label="Buchung bearbeiten" onClose={() => setEditing(false)}>
             <div className="entry-dialog-header">
               <span>
                 <strong>Buchung bearbeiten</strong>
@@ -206,8 +206,7 @@ export function LedgerEntryMenu({
                 </SubmitButton>
               </div>
             </FeedbackForm>
-          </div>
-        </div>
+        </ResponsiveDialog>
       ) : null}
     </div>
   );

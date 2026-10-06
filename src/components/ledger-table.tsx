@@ -1,5 +1,6 @@
 import { LedgerEntryMenu } from "@/components/ledger-entry-menu";
 import { StatusPill } from "@/components/status-pill";
+import { MobileLedgerList } from "@/components/mobile-ledger-list";
 import { formatMoney } from "@/lib/money";
 import type { CatalogItem, LedgerEntry, Team, TeamMember } from "@/lib/types";
 
@@ -33,7 +34,8 @@ export function LedgerTable({
         <h2>Buchungshistorie</h2>
         <span>{entries.length} Einträge</span>
       </div>
-      <div className="table-wrap">
+      <MobileLedgerList entries={entries} members={members} catalog={catalog} team={team} canVoid={canVoid} disabled={disabled} />
+      <div className="table-wrap desktop-ledger">
         <table className="responsive-table ledger-booking-table">
           <thead>
             <tr>
