@@ -71,4 +71,5 @@ assert.ok(!voidedList.includes("Admin actions"));
 const css = fs.readFileSync(path.join(root, "src/app/mobile-usability.css"), "utf8");
 assert.ok(css.includes(".desktop-ledger"));
 assert.ok(css.includes("grid-template-columns:repeat(4,minmax(0,1fr))"));
+assert.ok(css.includes(".mobile-ledger-row .entry-menu-wrap { margin-top:16px; width:44px; flex:0 0 44px; }"), "Admin menu must not inherit full-width mobile styling");
 console.log("PASS: role-specific navigation, own balance/credit, expandable history, audit details, no player admin actions");
